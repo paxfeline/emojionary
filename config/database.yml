@@ -1,0 +1,15 @@
+development:
+  adapter: postgresql
+  encoding: unicode
+  database: emojiapp_development
+  pool: 5
+  username: emojiapp
+  password: password1
+
+test:
+  adapter: postgresql
+  encoding: unicode
+  database: emojiapp_test
+  pool: 5
+  username: emojiapp
+  password: password1

@@ -1,0 +1,12 @@
+<h1>Emojis 2 Emojis</h1>
+
+<%= form_with model: @game do |form| %>
+  <div>
+    <%= form.label :title %><br>
+    <%= form.text_field :title %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
