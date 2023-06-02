@@ -11,7 +11,16 @@ class GamesController < ApplicationController
     @game = Game.new(game_params)
 
     if @game.save
-      redirect_to "/play?game_id=#{@game.id}"
+
+      @judge = Player.new
+
+      if @judge.save
+        session[:player_id] = @judge.id
+        cookies[:pax_emoji_game] = @judge.id
+        redirect_to "/play?game_id=#{@game.id}"
+      else
+        render :index, status: :unprocessable_entity
+      end
     else
       render :index, status: :unprocessable_entity
     end

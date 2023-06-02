@@ -10,20 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_05_30_041752) do
+ActiveRecord::Schema[7.0].define(version: 2023_05_30_041609) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
-
-  create_table "game_states", force: :cascade do |t|
-    t.uuid "player_id", null: false
-    t.uuid "game_id", null: false
-    t.string "state"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["game_id"], name: "index_game_states_on_game_id"
-    t.index ["player_id"], name: "index_game_states_on_player_id"
-  end
 
   create_table "games", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "title"
@@ -31,12 +21,10 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_30_041752) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "players", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "players", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  add_foreign_key "game_states", "games"
-  add_foreign_key "game_states", "players"
 end
