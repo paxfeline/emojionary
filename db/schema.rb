@@ -27,16 +27,21 @@ ActiveRecord::Schema[7.0].define(version: 2023_05_30_041752) do
 
   create_table "games", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "title"
+    t.uuid "judge_id"
+    t.string "deck"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["judge_id"], name: "index_games_on_judge_id"
   end
 
   create_table "players", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
+    t.datetime "last_judged"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
   add_foreign_key "game_states", "games"
   add_foreign_key "game_states", "players"
+  add_foreign_key "games", "players", column: "judge_id"
 end

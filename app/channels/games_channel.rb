@@ -5,7 +5,13 @@ class GamesChannel < ApplicationCable::Channel
 
   def after_confirmation_sent
     # broadcast initial message here
-    transmit({foo: "bar"})
+    puts "transmitting..."
+    debugger
+
+    transmit( {foo: "bar"} )
+    #transmit( { player_id: cookies[:emoji_game_player_id] } )
+
+    puts "end"
   end  
 
   def unsubscribed
