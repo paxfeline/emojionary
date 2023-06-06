@@ -4,8 +4,12 @@ class GamesController < ApplicationController
   end
 
   def show
+    debugger
+
     @game = Game.find(params[:game_id])
     puts @game.inspect
+
+    #debugger
 
     if session[:player_id].present?
       @user = Player.find(session[:player_id])
@@ -39,14 +43,23 @@ class GamesController < ApplicationController
   #  };
 
   def create
-    @game = Game.new(game_params)
-    @judge = Player.new
-    @game.judge = @judge
-    #@game.
+    debugger
 
-    if @game.save && @judge.save
-      session[:player_id] = @judge.id
-      cookies[:emoji_game_player_id] = @judge.id
+    @game = Game.new(game_params)
+
+    # find or create player
+    if session[:player_id].present?
+      @judge = Player.find(session[:player_id])
+    else
+      @judge = Player.new
+    end
+    @game.judge_id = @judge
+
+    if @judge.save && @game.save
+      if session[:player_id].nil?
+        session[:player_id] = @judge.id
+        cookies[:emoji_game_player_id] = @judge.id
+      end
       redirect_to "/play?game_id=#{@game.id}"
     else
       render :index, status: :unprocessable_entity

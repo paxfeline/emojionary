@@ -4,12 +4,12 @@ class Game < ApplicationRecord
     has_many :game_states
     has_many :players, through: :game_states
 
-    has_one :judge, :class_name => "Player", :foreign_key => "id"
+    #has_one :judge_id, :class_name => "Player", :foreign_key => "id"
 
 private
     def game_setup
         puts "game setup"
-        self.deck = "\u1F600".encode('utf-8')
+        self.deck = "\u{1F600}"
         puts self.deck
     end
 end
