@@ -3,4 +3,7 @@
 
 import { createConsumer } from "@rails/actioncable"
 
+window.App = window.App || {}
+App.cableConsumer = createConsumer();
+
 export default createConsumer()

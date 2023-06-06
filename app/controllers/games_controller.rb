@@ -4,7 +4,7 @@ class GamesController < ApplicationController
   end
 
   def show
-    debugger
+    #debugger
 
     @game = Game.find(params[:game_id])
     puts @game.inspect
@@ -43,7 +43,7 @@ class GamesController < ApplicationController
   #  };
 
   def create
-    debugger
+    #debugger
 
     @game = Game.new(game_params)
 
