@@ -11,6 +11,10 @@ class GamesChannel < ApplicationCable::Channel
     transmit( {foo: "bar"} )
     transmit( { id: player_id } )
 
+    @game = Game.find(params[:game_id])
+
+    @game.deal
+
     puts "end"
   end  
 
