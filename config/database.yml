@@ -13,3 +13,9 @@ test:
   pool: 5
   username: emojiapp
   password: password1
+
+production:
+  <<: *default
+  database: emoji2emoji
+  username: god
+  password: <%= ENV["MYAPP_DATABASE_PASSWORD"] %>
