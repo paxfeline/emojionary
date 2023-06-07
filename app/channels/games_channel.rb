@@ -13,9 +13,13 @@ class GamesChannel < ApplicationCable::Channel
 
     @game = Game.find(params[:game_id])
 
-    @game.deal
+    hand = @game.deal
 
-    puts "end"
+    puts hand.inspect
+
+    transmit( { hand: hand } )
+
+    puts "--end transmission--"
   end  
 
   def unsubscribed

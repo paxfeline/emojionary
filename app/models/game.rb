@@ -7,37 +7,45 @@ class Game < ApplicationRecord
     def deal
         puts "deal"
 
-        r = []
+        hand = []
+
+        #debugger
+
+        deck = JSON.parse self.deck
+
 
         20.times do
-            c = self.desk.sample
-            ind = rand(c.all.size)
-            r.append c.all[ind]
-            self.desk.delete(c)
+            cat = deck.sample
+            ind = rand(cat["all"].size)
+            #puts cat["all"][ind]
+            hand.append cat["all"][ind]
+            cat["all"].delete(ind)
         end
-
-        puts r.inspect
 
         self.save
 
-        r
+        return hand
     end
 
 private
     def game_setup
         puts "game setup"
-        self.deck =
+        # Emoji.all.group_by(&:category).map { |k,v| { category: k, all: v.map { |e| { raw: e.raw, name: e.name, ios: e.ios_version } } } }
+        deck =
             Emoji.all.group_by(&:category).map do |k,v|
                 {
                     category: k,
                     all:
-                        v.map do |e|
+                        v.filter {|u| u.ios_version.split(".")[0].to_i < 15}.map do |e|
                             {
-                                raw: e.raw, name: e.name, ios: e.ios_version
+                                "raw" => e.raw, "name" => e.name, "ios" => e.ios_version
                             }
                         end
                 }
             end
+        #debugger
+        self.deck = JSON.generate deck
+        puts self.inspect
         self.save
     end
 end
