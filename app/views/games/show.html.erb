@@ -4,8 +4,8 @@
 
 <script>
 
-addEventListener("DOMContentLoaded",
-    (event) =>
+let cableFunc =
+    () =>
     {
         // App.cableConsumer comes from consumer.js
         App.cableConsumer.subscriptions.create(
@@ -27,9 +27,11 @@ addEventListener("DOMContentLoaded",
                 }
             }
         );
-    }
-);
+    };
 
-
+if (document.readyState !== 'loading')
+    cableFunc();
+else
+    addEventListener("DOMContentLoaded", cableFunc);
 
 </script>
