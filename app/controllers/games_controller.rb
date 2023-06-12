@@ -12,10 +12,10 @@ class GamesController < ApplicationController
     #debugger
 
     if session[:player_id].present?
-      @user = Player.find(session[:player_id])
+      @user = Player.find_by(id: session[:player_id])
+    end
 
-      puts @user.inspect
-    else
+    if @user.nil?
       @user = Player.new
 
       if @user.save
@@ -29,19 +29,6 @@ class GamesController < ApplicationController
     end
   end
 
-  #n = Emoji.all.group_by(&:category).map
-  #  { |k,v|
-  #    {
-  #      category: k,
-  #      all: v.map
-  #        { |e|
-  #          {
-  #            raw: e.raw, name: e.name, ios: e.ios_version
-  #          }
-  #        }
-  #    }
-  #  };
-
   def create
     #debugger
 
@@ -49,18 +36,31 @@ class GamesController < ApplicationController
 
     # find or create player
     if session[:player_id].present?
-      @judge = Player.find(session[:player_id])
+      @judge = Player.find_by(id: session[:player_id])
+      if @judge.nil?
+        session[:player_id] = nil
+        @judge = Player.new
+      end
     else
       @judge = Player.new
     end
-    @game.judge_id = @judge
 
-    if @judge.save && @game.save
-      if session[:player_id].nil?
-        session[:player_id] = @judge.id
-        cookies[:emoji_game_player_id] = @judge.id
+    @game.prompt = Prompt.all.sample
+
+    debugger
+
+    # sometimes don't need to save judge
+    if @judge.save
+      @game.judge = @judge
+      if @game.save
+        if session[:player_id].nil?
+          session[:player_id] = @judge.id
+          cookies[:emoji_game_player_id] = @judge.id
+        end
+        redirect_to "/play?game_id=#{@game.id}"
+      else
+        render :index, status: :unprocessable_entity
       end
-      redirect_to "/play?game_id=#{@game.id}"
     else
       render :index, status: :unprocessable_entity
     end

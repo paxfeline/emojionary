@@ -7,14 +7,23 @@ class GamesChannel < ApplicationCable::Channel
   def after_confirmation_sent
     # broadcast initial message here
     puts "transmitting..."
-    #debugger
-
+    
     transmit( { cmd: "id", id: player_id } )
-
+    
     game = Game.find(params[:game_id])
     player = Player.find(player_id)
+    
+    if game.judge_id == player.id
+      transmit( { cmd: "judge" } )
+    else
+      transmit( { cmd: "artist" } )
+    end
 
-    game_state = GameState.find_by(player_id: player_id)
+    #debugger
+
+    #game_state = GameState.find_by(player_id: player_id)
+    game_state = GameState.find_by({player_id: player_id, game_id: game.id})
+
     if game_state.nil?
       game_state = GameState.new
       game_state.game = game

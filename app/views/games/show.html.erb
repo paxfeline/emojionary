@@ -1,6 +1,96 @@
+<style>
+
+*
+{
+    box-sizing: border-box;
+}
+
+body
+{
+    margin: 0;
+    overflow: hidden;
+    height: 100vh;
+}
+
+#game
+{
+    touch-action: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    height: 100%;
+}
+
+.dragitem
+{
+    transition: transform 0.25s;
+    border-radius: 50%;
+    line-height: 100%;
+    font-size: 100pt;
+    /* position: absolute;*/
+}
+
+.dropzone
+{
+    /*
+    width: 50vmin;
+    height: 35vmax;
+    */
+    position: relative;
+    display: inline-block;
+    outline: 1px solid black;
+    flex: 1; /* => grow: 1 shrink: 1 basis: 0 */
+}
+
+#main > .dragitem
+{
+
+}
+
+.dropzone-active
+{
+    box-shadow: inset 0px 0px 20px rgba(255, 100, 100, 0.5);
+}
+
+.dragitem-dragging
+{
+    /*transform: scale(300%);*/
+    z-index: 10;
+    position: absolute;
+}
+
+/*[data-role-extra="hand"]
+{
+    overflow-x: scroll;
+    padding: 3vmin;
+}*/
+
+.vis-hid
+{
+    visibility: hidden;
+}
+
+</style>
+
+<div style="position: absolute; background-color: rgba(255, 255, 255, 0.8);">
+
 <h1>Play!</h1>
 
 <%= @game.title %>
+
+</div>
+
+<div id="game">
+    <div class="dropzone" data-role="dropzone">
+    </div>
+    <div id="hand" class="dropzone" data-role="dropzone" data-role-extra="hand">
+    </div>
+</div>
+
+<template id="emoji-piece-template">
+    <span class="dragitem"  data-role="dragitem"></span>
+</template>
 
 <script>
 
@@ -27,6 +117,20 @@ let cableFunc =
                 received(data) {
                 // Called when there's incoming data on the websocket for this channel
                     console.log("cable incoming", data);
+
+                    if (data.cmd == "hand")
+                    {
+                        let handDiv = document.querySelector("#hand");
+                        console.log(data.hand);
+                        let hand = JSON.parse(data.hand);
+                        console.log(hand);
+                        hand.forEach(emoji =>
+                            {
+                                let emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
+                                emel.innerHTML = emoji.raw;
+                                handDiv.appendChild(emel);
+                            })
+                    }
                 }
             }
         );
@@ -36,5 +140,178 @@ if (document.readyState !== 'loading')
     cableFunc();
 else
     addEventListener("DOMContentLoaded", cableFunc);
+
+
+let game = document.querySelector("#game");
+
+let gameState = {};
+
+game.addEventListener("pointerdown",
+    e =>
+    {
+        //console.log("pd", e);
+
+        let role = e.target.dataset.role;
+
+        if (role == "dragitem")
+        {
+            e.preventDefault();
+            game.setPointerCapture(e.pointerId);
+            gameState.dragging = e.target.cloneNode(true);
+            gameState.dragOrig = e.target;
+            e.target.parentNode.appendChild(gameState.dragging);
+            e.target.classList.add("vis-hid");
+            console.log(gameState.dragging.classList);
+            gameState.dragging.classList.add("dragitem-dragging");
+            gameState.start = {x: e.pageX, y: e.pageY};
+            gameState.dragging.dataset.x = e.target.offsetLeft - e.target.parentNode.scrollLeft;
+            gameState.dragging.dataset.y = e.target.offsetTop; // + e.target.parentNode.offsetTop;
+            gameState.dragging.style.left = `${gameState.dragging.dataset.x}px`;
+            gameState.dragging.style.top = `${gameState.dragging.dataset.y}px`;
+        }
+    }
+);
+
+game.addEventListener("pointermove",
+    e =>
+    {
+        if (!gameState.dragging) return;
+
+        //console.log("pm", e.target.dataset.role, e);
+
+        let hits = document.elementsFromPoint(e.clientX, e.clientY);
+
+        let hit;
+        while ( hit = hits.pop() )
+        {
+            if (hit.dataset.role == "dropzone")
+            {
+                console.log("hit", hit);
+                hit.classList.add("dropzone-active");
+                if (gameState.hot != hit)
+                {
+                    if (gameState.hot)
+                        gameState.hot.classList.remove("dropzone-active");
+                    gameState.hot = hit;
+                }
+                break;
+            }
+        }
+
+        let t = gameState.dragging;
+
+        //console.log(`${Number(t.dataset.x) + (e.pageX - gameState.start.x)}px\n${Number(t.dataset.y) + (e.pageY - gameState.start.y)}px`);
+
+        //console.log(`${Number(t.dataset.x)} + ${(e.pageX - gameState.start.x)}px`);
+
+        t.style.left = `${Number(t.dataset.x) + (e.pageX - gameState.start.x)}px`;
+        t.style.top = `${Number(t.dataset.y) + (e.pageY - gameState.start.y)}px`;
+    }
+);
+
+function getTop(elem)
+{
+    let rect = elem.getBoundingClientRect();
+    return rect.top + window.scrollY;
+}
+
+function getLeft(elem)
+{
+    let rect = elem.getBoundingClientRect();
+    return rect.left + window.scrollX;
+}
+
+game.addEventListener("pointerup",
+    e =>
+    {
+        //console.log("pu", e.target.dataset.role, e);
+
+        game.releasePointerCapture(e.pointerId);
+
+        //let role = e.target.dataset.role;
+
+        let hits = document.elementsFromPoint(e.clientX, e.clientY);
+
+        //console.log(hits);
+
+        let hit;
+        while ( hit = hits.pop() )
+        {
+            if (hit.dataset.role == "dropzone")
+            {
+                //console.log("hit", hit);
+                break;
+            }
+        }
+
+        let t = gameState.dragging;
+        let d = hit;
+
+        if (!t || !d) return;
+
+        //gameState.dragging = null;
+
+        //debugger;
+
+        //let x = t.offsetLeft - d.offsetLeft;
+        
+        d.classList.remove("dropzone-active");
+
+        /*
+        t.addEventListener("transitionend",
+            function tee(e)
+            {
+                debugger;
+                */
+               
+               
+               if (d.dataset.roleExtra == "hand")
+                {
+                    gameState.dragOrig.classList.remove("vis-hid");
+                    t.remove();
+                    gameState.dragging = null;
+                }
+                else
+                {
+                    //let y = t.offsetTop - d.offsetTop;
+
+                    gameState.dragOrig.remove();
+                    gameState.dragging = null;
+            
+                    let x = getLeft(t) - d.offsetLeft;
+                    let y = getTop(t) - d.offsetTop;
+
+                    let width = t.offsetWidth;
+                    let height = t.offsetHeight;
+
+                    let left = x * 100 / (d.offsetWidth);// - width);
+                    let top = y * 100 / (d.offsetHeight);// - height);
+            
+                    //console.log(Number(t.dataset.y) + (e.pageY - gameState.start.y));
+            
+                    /*
+                    t.style.left = `${x}px`;
+                    t.style.top = `${y}px`;
+
+                    t.style.left = `calc((100% - ${width}px) * ${left})`;
+                    t.style.top = `calc((100% - ${height}px) * ${top})`;
+                    */
+
+                    t.style.left = `${left}%`;
+                    t.style.top = `${top}%`;
+                   
+                    t.style.position = "absolute";
+                    t.classList.remove("dragitem-dragging");
+            
+                    d.append(t);
+
+                    //t.removeEventListener("transitionend", tee);
+                }
+            /*
+            }
+        );
+        */
+    }
+);
 
 </script>
