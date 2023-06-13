@@ -27,7 +27,7 @@ body
     transition: transform 0.25s;
     border-radius: 50%;
     line-height: 100%;
-    font-size: 100pt;
+    font-size: 15vmin;
     /* position: absolute;*/
 }
 
@@ -155,6 +155,7 @@ game.addEventListener("pointerdown",
 
         if (role == "dragitem")
         {
+            gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
             e.preventDefault();
             game.setPointerCapture(e.pointerId);
             gameState.dragging = e.target.cloneNode(true);
@@ -252,8 +253,6 @@ game.addEventListener("pointerup",
         //gameState.dragging = null;
 
         //debugger;
-
-        //let x = t.offsetLeft - d.offsetLeft;
         
         d.classList.remove("dropzone-active");
 
@@ -267,9 +266,34 @@ game.addEventListener("pointerup",
                
                if (d.dataset.roleExtra == "hand")
                 {
-                    gameState.dragOrig.classList.remove("vis-hid");
-                    t.remove();
-                    gameState.dragging = null;
+                    if (gameState.fromHand)
+                    {
+                        gameState.dragOrig.classList.remove("vis-hid");
+                        t.remove();
+                        gameState.dragging = null;
+                    }
+                    else
+                    {
+                        gameState.dragOrig.remove();
+
+                        t.removeAttribute("style");
+                        t.classList.remove("dragitem-dragging");
+            
+                        // find item dropped on
+                        while ( hit = hits.pop() )
+                        {
+                            if (hit.dataset.role == "dragitem" && hit != gameState.dragging)
+                            {
+                                //console.log("hit", hit);
+                                d.insertBefore(t, hit);
+                                gameState.dragging = null;
+                                return;
+                            }
+                        }
+                        debugger;
+                        gameState.dragging = null;
+                        d.appendChild(t);
+                    }
                 }
                 else
                 {
@@ -284,21 +308,21 @@ game.addEventListener("pointerup",
                     let width = t.offsetWidth;
                     let height = t.offsetHeight;
 
-                    let left = x * 100 / (d.offsetWidth);// - width);
-                    let top = y * 100 / (d.offsetHeight);// - height);
+                    let left = x / (d.offsetWidth - width);
+                    let top = y / (d.offsetHeight - height);
             
                     //console.log(Number(t.dataset.y) + (e.pageY - gameState.start.y));
             
                     /*
                     t.style.left = `${x}px`;
                     t.style.top = `${y}px`;
-
-                    t.style.left = `calc((100% - ${width}px) * ${left})`;
-                    t.style.top = `calc((100% - ${height}px) * ${top})`;
+                   
+                    t.style.left = `${left * 100}%`;
+                    t.style.top = `${top * 100}%`;
                     */
-
-                    t.style.left = `${left}%`;
-                    t.style.top = `${top}%`;
+                   
+                    t.style.left = `calc((100% - 15vmin) * ${left})`;
+                    t.style.top = `calc((100% - 15vmin) * ${top})`;
                    
                     t.style.position = "absolute";
                     t.classList.remove("dragitem-dragging");
