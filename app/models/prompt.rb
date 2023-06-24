@@ -1,3 +1,3 @@
 class Prompt < ApplicationRecord
-    belongs_to :game
+    has_many :game
 end
