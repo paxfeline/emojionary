@@ -95,6 +95,20 @@ body
     visibility: hidden;
 }
 
+#judge
+{
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 50vw 50vw;
+}
+
+#judge > div
+{
+    height: 25vw;
+    --scale: 0.5;
+}
+
 </style>
 
 <div style="position: absolute; background-color: rgba(255, 255, 255, 0.8);">
@@ -114,11 +128,22 @@ body
     </div>
 </div>
 
+<div id="judge">
+</div>
+
 <template id="emoji-piece-template">
     <span class="dragitem"  data-role="dragitem"></span>
 </template>
 
 <script>
+
+function text2CSS(text)
+{
+    const el = document.createElement('div');
+    el.style.cssText = text;
+    return el.style;
+
+}
 
 var cableFunc =
     () =>
@@ -147,6 +172,8 @@ var cableFunc =
                     if (data.cmd == "hand")
                     {
                         let handDiv = document.querySelector("#hand");
+                        let boardDiv = document.querySelector("#board");
+                        handDiv.innerHTML = boardDiv.innerHTML = "";
                         console.log(data.hand);
                         let hand = JSON.parse(data.hand);
                         console.log(hand);
@@ -156,8 +183,31 @@ var cableFunc =
                                 let emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
                                 emel.innerHTML = emoji.raw;
                                 emel.title = emoji.name;
-                                handDiv.appendChild(emel);
+                                if (emoji.position)
+                                {
+                                    let style = text2CSS(emoji.position);
+                                    emel.style.left = style.left;
+                                    emel.style.top = style.top;
+                                    emel.style.position = style.position;
+                                    if (style["--scale"]) emel.style["--scale"] = style["--scale"];
+                                    boardDiv.appendChild(emel);
+                                }
+                                else
+                                    handDiv.appendChild(emel);
                             })
+                    }
+                    else if (data.cmd == "judge")
+                    {
+                        let gameDiv = document.querySelector("#game");
+                        let judgeDiv = document.querySelector("#judge");
+
+                        gameDiv.hidden = true;
+                        judgeDiv.hidden = false;
+                    }
+                    else if (data.cmd == "artist")
+                    {
+                        gameDiv.hidden = false;
+                        judgeDiv.hidden = true;
                     }
                 }
             }
@@ -355,21 +405,21 @@ game.addEventListener("pointerup",
             
                    d.append(t);
 
-                   // fix up game hand:
-                   // move emoji to last spot
-
-                   let ind = gameState.hand.findIndex( el => el.name == t.title );
-
-                   let [em] = gameState.hand.splice(ind, 1);
-
-                   em.position = t.getAttribute("style");
-
-                   gameState.hand.push(em);
-
-                   App.subc.perform("update", { hand: gameState.hand });
-
                    //t.removeEventListener("transitionend", tee);
                 }
+
+                // fix up game hand:
+                // move emoji to last spot
+
+                let ind = gameState.hand.findIndex( el => el.name == t.title );
+
+                let [em] = gameState.hand.splice(ind, 1);
+
+                em.position = t.getAttribute("style");
+
+                gameState.hand.push(em);
+
+                App.subc.perform("update", { hand: gameState.hand });
             /*
             }
         );

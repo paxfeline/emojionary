@@ -7,7 +7,6 @@ class Game < ApplicationRecord
     has_many :used_prompts
     has_many :prompts, through: :used_prompts
 
-    belongs_to :prompt
     belongs_to :judge, class_name: "Player"
 
     def deal
