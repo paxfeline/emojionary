@@ -47,7 +47,7 @@ class GamesController < ApplicationController
 
     @game.prompt = Prompt.all.sample
 
-    debugger
+    #debugger
 
     # sometimes don't need to save judge
     if @judge.save
