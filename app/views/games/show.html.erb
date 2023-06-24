@@ -147,6 +147,7 @@ function text2CSS(text)
 
 var handDiv = document.querySelector("#hand");
 var boardDiv = document.querySelector("#board");
+var gameDiv = document.querySelector("#game");
 
 window.App = window.App || {}
 
@@ -225,9 +226,6 @@ if (document.readyState !== 'loading')
     cableFunc();
 else
     addEventListener("DOMContentLoaded", cableFunc);
-
-
-var game = document.querySelector("#game");
 
 var gameState = {};
 
