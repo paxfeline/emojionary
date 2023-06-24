@@ -145,9 +145,21 @@ function text2CSS(text)
 
 }
 
+var handDiv = document.querySelector("#hand");
+var boardDiv = document.querySelector("#board");
+
+window.App = window.App || {}
+
 var cableFunc =
     () =>
     {
+        // if consumer isn't loaded, set callback to this function and exit
+        if (!App.cableConsumer)
+        {
+            App.cableConsumerCallback = cableFunc;
+            return;
+        }
+
         // App.cableConsumer comes from consumer.js
         App.subc = App.cableConsumer.subscriptions.create(
             {
@@ -171,21 +183,19 @@ var cableFunc =
 
                     if (data.cmd == "hand")
                     {
-                        let handDiv = document.querySelector("#hand");
-                        let boardDiv = document.querySelector("#board");
                         handDiv.innerHTML = boardDiv.innerHTML = "";
                         console.log(data.hand);
-                        let hand = JSON.parse(data.hand);
+                        var hand = JSON.parse(data.hand);
                         console.log(hand);
                         gameState.hand = hand;
                         hand.forEach(emoji =>
                             {
-                                let emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
+                                var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
                                 emel.innerHTML = emoji.raw;
                                 emel.title = emoji.name;
                                 if (emoji.position)
                                 {
-                                    let style = text2CSS(emoji.position);
+                                    var style = text2CSS(emoji.position);
                                     emel.style.left = style.left;
                                     emel.style.top = style.top;
                                     emel.style.position = style.position;
@@ -198,9 +208,6 @@ var cableFunc =
                     }
                     else if (data.cmd == "judge")
                     {
-                        let gameDiv = document.querySelector("#game");
-                        let judgeDiv = document.querySelector("#judge");
-
                         gameDiv.hidden = true;
                         judgeDiv.hidden = false;
                     }
@@ -220,16 +227,16 @@ else
     addEventListener("DOMContentLoaded", cableFunc);
 
 
-let game = document.querySelector("#game");
+var game = document.querySelector("#game");
 
-let gameState = {};
+var gameState = {};
 
 game.addEventListener("pointerdown",
     e =>
     {
         //console.log("pd", e);
 
-        let role = e.target.dataset.role;
+        var role = e.target.dataset.role;
 
         if (role == "dragitem")
         {
@@ -258,9 +265,9 @@ game.addEventListener("pointermove",
 
         //console.log("pm", e.target.dataset.role, e);
 
-        let hits = document.elementsFromPoint(e.clientX, e.clientY);
+        var hits = document.elementsFromPoint(e.clientX, e.clientY);
 
-        let hit;
+        var hit;
         while ( hit = hits.pop() )
         {
             if (hit.dataset.role == "dropzone")
@@ -277,7 +284,7 @@ game.addEventListener("pointermove",
             }
         }
 
-        let t = gameState.dragging;
+        var t = gameState.dragging;
 
         //console.log(`${Number(t.dataset.x) + (e.pageX - gameState.start.x)}px\n${Number(t.dataset.y) + (e.pageY - gameState.start.y)}px`);
 
@@ -290,13 +297,13 @@ game.addEventListener("pointermove",
 
 function getTop(elem)
 {
-    let rect = elem.getBoundingClientRect();
+    var rect = elem.getBoundingClientRect();
     return rect.top + window.scrollY;
 }
 
 function getLeft(elem)
 {
-    let rect = elem.getBoundingClientRect();
+    var rect = elem.getBoundingClientRect();
     return rect.left + window.scrollX;
 }
 
@@ -307,9 +314,9 @@ game.addEventListener("pointerup",
 
         game.releasePointerCapture(e.pointerId);
 
-        let hits = document.elementsFromPoint(e.clientX, e.clientY);
+        var hits = document.elementsFromPoint(e.clientX, e.clientY);
 
-        let hit;
+        var hit;
         while ( hit = hits.pop() )
         {
             if (hit.dataset.role == "dropzone")
@@ -319,8 +326,8 @@ game.addEventListener("pointerup",
             }
         }
 
-        let t = gameState.dragging;
-        let d = hit;
+        var t = gameState.dragging;
+        var d = hit;
 
         if (!t || !d) return;
 
@@ -371,19 +378,19 @@ game.addEventListener("pointerup",
                 }
                 else
                 {
-                    //let y = t.offsetTop - d.offsetTop;
+                    //var y = t.offsetTop - d.offsetTop;
 
                     gameState.dragOrig.remove();
                     gameState.dragging = null;
             
-                    let x = getLeft(t) - d.offsetLeft;
-                    let y = getTop(t) - d.offsetTop;
+                    var x = getLeft(t) - d.offsetLeft;
+                    var y = getTop(t) - d.offsetTop;
 
-                    let width = t.offsetWidth;
-                    let height = t.offsetHeight;
+                    var width = t.offsetWidth;
+                    var height = t.offsetHeight;
 
-                    let left = x / (d.offsetWidth - width);
-                    let top = y / (d.offsetHeight - height);
+                    var left = x / (d.offsetWidth - width);
+                    var top = y / (d.offsetHeight - height);
             
                     //console.log(Number(t.dataset.y) + (e.pageY - gameState.start.y));
             
@@ -395,7 +402,7 @@ game.addEventListener("pointerup",
                     t.style.top = `${top * 100}%`;
                     */
                    
-                   let size = t.style.fontSize || "15vmin";
+                   var size = t.style.fontSize || "15vmin";
 
                    t.style.left = `calc((100% - ${size} * var(--scale, 1)) * ${left})`;
                    t.style.top = `calc((100% - ${size} * var(--scale, 1)) * ${top})`;
@@ -411,9 +418,9 @@ game.addEventListener("pointerup",
                 // fix up game hand:
                 // move emoji to last spot
 
-                let ind = gameState.hand.findIndex( el => el.name == t.title );
+                var ind = gameState.hand.findIndex( el => el.name == t.title );
 
-                let [em] = gameState.hand.splice(ind, 1);
+                var [em] = gameState.hand.splice(ind, 1);
 
                 em.position = t.getAttribute("style");
 

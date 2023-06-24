@@ -6,4 +6,8 @@ import { createConsumer } from "@rails/actioncable"
 window.App = window.App || {}
 App.cableConsumer = createConsumer();
 
+// check for callback
+if (App.cableConsumerCallback)
+    App.cableConsumerCallback();
+
 export default createConsumer()
