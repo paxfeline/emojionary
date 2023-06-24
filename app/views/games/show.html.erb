@@ -3,6 +3,18 @@
 *
 {
     box-sizing: border-box;
+    --board-y: 50vh;
+    --board-x: 100vh;
+}
+
+@media (orientation: portrait)
+{
+    *
+    {
+        --board-y: 50vw;
+        --board-x: 100vw;
+    }
+
 }
 
 body
@@ -22,13 +34,26 @@ body
     height: 100%;
 }
 
+#board
+{
+    width: var(--board-x);
+    height: var(--board-y);
+    flex: unset;
+}
+
+#board-holder
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .dragitem
 {
     transition: transform 0.25s;
     border-radius: 50%;
     line-height: 100%;
-    font-size: 15vmin;
-    /* position: absolute;*/
+    font-size: calc(15vmin * var(--scale, 1));
 }
 
 .dropzone
@@ -60,11 +85,10 @@ body
     position: absolute;
 }
 
-/*[data-role-extra="hand"]
+#hand
 {
-    overflow-x: scroll;
     padding: 3vmin;
-}*/
+}
 
 .vis-hid
 {
@@ -82,7 +106,9 @@ body
 </div>
 
 <div id="game">
-    <div class="dropzone" data-role="dropzone">
+    <div id="board-holder">
+        <div id="board" class="dropzone" data-role="dropzone">
+        </div>
     </div>
     <div id="hand" class="dropzone" data-role="dropzone" data-role-extra="hand">
     </div>
@@ -94,11 +120,11 @@ body
 
 <script>
 
-let cableFunc =
+var cableFunc =
     () =>
     {
         // App.cableConsumer comes from consumer.js
-        App.cableConsumer.subscriptions.create(
+        App.subc = App.cableConsumer.subscriptions.create(
             {
                 channel: "GamesChannel",
                 game_id: new URLSearchParams(document.location.search).get("game_id")
@@ -124,10 +150,12 @@ let cableFunc =
                         console.log(data.hand);
                         let hand = JSON.parse(data.hand);
                         console.log(hand);
+                        gameState.hand = hand;
                         hand.forEach(emoji =>
                             {
                                 let emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
                                 emel.innerHTML = emoji.raw;
+                                emel.title = emoji.name;
                                 handDiv.appendChild(emel);
                             })
                     }
@@ -162,7 +190,7 @@ game.addEventListener("pointerdown",
             gameState.dragOrig = e.target;
             e.target.parentNode.appendChild(gameState.dragging);
             e.target.classList.add("vis-hid");
-            console.log(gameState.dragging.classList);
+            //console.log(gameState.dragging.classList);
             gameState.dragging.classList.add("dragitem-dragging");
             gameState.start = {x: e.pageX, y: e.pageY};
             gameState.dragging.dataset.x = e.target.offsetLeft - e.target.parentNode.scrollLeft;
@@ -187,7 +215,7 @@ game.addEventListener("pointermove",
         {
             if (hit.dataset.role == "dropzone")
             {
-                console.log("hit", hit);
+                //console.log("hit", hit);
                 hit.classList.add("dropzone-active");
                 if (gameState.hot != hit)
                 {
@@ -229,11 +257,7 @@ game.addEventListener("pointerup",
 
         game.releasePointerCapture(e.pointerId);
 
-        //let role = e.target.dataset.role;
-
         let hits = document.elementsFromPoint(e.clientX, e.clientY);
-
-        //console.log(hits);
 
         let hit;
         while ( hit = hits.pop() )
@@ -290,7 +314,7 @@ game.addEventListener("pointerup",
                                 return;
                             }
                         }
-                        debugger;
+                        //debugger;
                         gameState.dragging = null;
                         d.appendChild(t);
                     }
@@ -321,15 +345,30 @@ game.addEventListener("pointerup",
                     t.style.top = `${top * 100}%`;
                     */
                    
-                    t.style.left = `calc((100% - 15vmin) * ${left})`;
-                    t.style.top = `calc((100% - 15vmin) * ${top})`;
-                   
-                    t.style.position = "absolute";
-                    t.classList.remove("dragitem-dragging");
-            
-                    d.append(t);
+                   let size = t.style.fontSize || "15vmin";
 
-                    //t.removeEventListener("transitionend", tee);
+                   t.style.left = `calc((100% - ${size} * var(--scale, 1)) * ${left})`;
+                   t.style.top = `calc((100% - ${size} * var(--scale, 1)) * ${top})`;
+                   
+                   t.style.position = "absolute";
+                   t.classList.remove("dragitem-dragging");
+            
+                   d.append(t);
+
+                   // fix up game hand:
+                   // move emoji to last spot
+
+                   let ind = gameState.hand.findIndex( el => el.name == t.title );
+
+                   let [em] = gameState.hand.splice(ind, 1);
+
+                   em.position = t.getAttribute("style");
+
+                   gameState.hand.push(em);
+
+                   App.subc.perform("update", { hand: gameState.hand });
+
+                   //t.removeEventListener("transitionend", tee);
                 }
             /*
             }

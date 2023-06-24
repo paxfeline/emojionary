@@ -50,4 +50,18 @@ class GamesChannel < ApplicationCable::Channel
   def judge_select_choice
 
   end
+
+  def update(data)
+    puts "update CALLED"
+    puts data
+
+    #player = Player.find(player_id)
+    #game = Game.find(game_id)
+    
+    #debugger
+
+    game_state = GameState.find_by({player_id: player_id, game_id: params[:game_id]})
+    game_state.state = data["hand"].to_json
+    game_state.save
+  end
 end

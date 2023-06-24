@@ -29,7 +29,7 @@ class Game < ApplicationRecord
 
         self.save
 
-        debugger
+        #debugger
 
         return hand.to_json
     end
