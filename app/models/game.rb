@@ -62,7 +62,7 @@ private
         up.prompt = self.prompt
         up.game = self
 
-        puts self.inspect
+        #puts self.inspect
         self.save
     end
 end

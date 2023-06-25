@@ -34,7 +34,7 @@ class GamesChannel < ApplicationCable::Channel
       hand = game_state.state
     end
 
-    puts hand.inspect
+    #puts hand.inspect
 
     game_state.save
 
@@ -74,7 +74,7 @@ class GamesChannel < ApplicationCable::Channel
 
   def update(data)
     puts "update CALLED"
-    puts data
+    #puts data
 
     #player = Player.find(player_id)
     #game = Game.find(game_id)

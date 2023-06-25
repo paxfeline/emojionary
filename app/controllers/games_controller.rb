@@ -59,9 +59,11 @@ class GamesController < ApplicationController
         end
         redirect_to "/play?game_id=#{@game.id}"
       else
+        puts "game save fail"
         render :index, status: :unprocessable_entity
       end
     else
+      puts "judge save fail"
       render :index, status: :unprocessable_entity
     end
   end
