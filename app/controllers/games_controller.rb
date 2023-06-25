@@ -65,7 +65,7 @@ class GamesController < ApplicationController
       end
     else
       puts "judge save fail"
-      puts @game.errors.full_messages
+      puts @judge.errors.full_messages
       render :index, status: :unprocessable_entity
     end
   end
