@@ -5,7 +5,7 @@ class Game < ApplicationRecord
     has_many :players, through: :game_states
 
     has_many :used_prompts
-    has_one :prompt
+    belongs_to :prompt
 
     belongs_to :judge, class_name: "Player"
 

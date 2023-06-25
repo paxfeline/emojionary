@@ -5,6 +5,7 @@
     box-sizing: border-box;
     --board-y: 50vh;
     --board-x: 100vh;
+    --base-size: 15vmin;
 }
 
 @media (orientation: portrait)
@@ -53,7 +54,7 @@ body
     transition: transform 0.25s;
     border-radius: 50%;
     line-height: 100%;
-    font-size: calc(15vmin * var(--scale, 1));
+    font-size: calc(var(--base-size) * var(--scale, 1));
 }
 
 .dropzone
@@ -95,18 +96,27 @@ body
     visibility: hidden;
 }
 
+.gone
+{
+    display: none !important;
+}
+
 #judge
 {
     width: 100vw;
     height: 100vh;
-    display: grid;
-    grid-template-columns: 50vw 50vw;
 }
 
-#judge > div
+#field
+{
+    display: grid;
+    grid-template-columns: 50vw 50vw;
+    --base-size: 7.5vmin;
+}
+
+#field > div
 {
     height: 25vw;
-    --scale: 0.5;
 }
 
 </style>
@@ -129,6 +139,12 @@ body
 </div>
 
 <div id="judge">
+    <button
+        onclick="startCountdown()">
+        Start Countdown
+    </button>
+    <div id="countdown"></div>
+    <div id="field"></div>
 </div>
 
 <template id="emoji-piece-template">
@@ -149,8 +165,16 @@ var handDiv = document.querySelector("#hand");
 var boardDiv = document.querySelector("#board");
 var gameDiv = document.querySelector("#game");
 var judgeDiv = document.querySelector("#judge");
+var countdownDiv = document.querySelector("#countdown");
+var fieldDiv = document.querySelector("#field");
 
 window.App = window.App || {}
+
+function startCountdown()
+{
+
+    App.subc.perform("start_countdown");
+}
 
 var cableFunc =
     () =>
@@ -190,7 +214,8 @@ var cableFunc =
                         var hand = JSON.parse(data.hand);
                         console.log(hand);
                         gameState.hand = hand;
-                        hand.forEach(emoji =>
+                        hand.forEach(
+                            emoji =>
                             {
                                 var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
                                 emel.innerHTML = emoji.raw;
@@ -210,13 +235,21 @@ var cableFunc =
                     }
                     else if (data.cmd == "judge")
                     {
-                        gameDiv.hidden = true;
-                        judgeDiv.hidden = false;
+                        gameDiv.classList.add("gone")
+                        judgeDiv.classList.remove("gone")
                     }
                     else if (data.cmd == "artist")
                     {
-                        gameDiv.hidden = false;
-                        judgeDiv.hidden = true;
+                        gameDiv.classList.remove("gone")
+                        judgeDiv.classList.add("gone")
+                    }
+                    else if (data.cmd == "countdown")
+                    {
+                        console.log(data);
+                    }
+                    else if (data.cmd == "show-em")
+                    {
+
                     }
                 }
             }
@@ -400,11 +433,9 @@ game.addEventListener("pointerup",
                     t.style.left = `${left * 100}%`;
                     t.style.top = `${top * 100}%`;
                     */
-                   
-                   var size = t.style.fontSize || "15vmin";
 
-                   t.style.left = `calc((100% - ${size} * var(--scale, 1)) * ${left})`;
-                   t.style.top = `calc((100% - ${size} * var(--scale, 1)) * ${top})`;
+                   t.style.left = `calc((100% - var(--base-size) * var(--scale, 1)) * ${left})`;
+                   t.style.top = `calc((100% - var(--base-size) * var(--scale, 1)) * ${top})`;
                    
                    t.style.position = "absolute";
                    t.classList.remove("dragitem-dragging");
