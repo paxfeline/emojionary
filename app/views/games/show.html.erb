@@ -405,8 +405,11 @@ game.addEventListener("pointerup",
                 */
                
                
-               if (d.dataset.roleExtra == "hand")
+                if (d.dataset.roleExtra == "hand")
                 {
+                    // items in hand should have no style attribute
+                    t.removeAttribute("style");
+
                     if (gameState.fromHand)
                     {
                         gameState.dragOrig.classList.remove("vis-hid");
@@ -417,7 +420,6 @@ game.addEventListener("pointerup",
                     {
                         gameState.dragOrig.remove();
 
-                        t.removeAttribute("style");
                         t.classList.remove("dragitem-dragging");
             
                         // find item dropped on
