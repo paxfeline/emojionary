@@ -3,9 +3,6 @@
 *
 {
     box-sizing: border-box;
-    --board-y: 50vh;
-    --board-x: 100vh;
-    --base-size: 15vmin;
 }
 
 @media (orientation: portrait)
@@ -23,6 +20,10 @@ body
     margin: 0;
     overflow: hidden;
     height: 100vh;
+
+    --board-y: 50vh;
+    --board-x: 100vh;
+    --base-size: 15vmin;
 }
 
 #game
@@ -117,13 +118,13 @@ body
 #field > div
 {
     height: 25vw;
+    position: relative;
+    outline: 1px solid black;
 }
 
 </style>
 
 <div style="position: absolute; background-color: rgba(255, 255, 255, 0.8);">
-
-<h1>Play!</h1>
 
 <%= @game.title %>
 
@@ -207,7 +208,11 @@ var cableFunc =
                 // Called when there's incoming data on the websocket for this channel
                     console.log("cable incoming", data);
 
-                    if (data.cmd == "hand")
+                    if (data.cmd == "id")
+                    {
+                        gameState.player = data.id;
+                    }
+                    else if (data.cmd == "hand")
                     {
                         handDiv.innerHTML = boardDiv.innerHTML = "";
                         console.log(data.hand);
@@ -231,7 +236,7 @@ var cableFunc =
                                 }
                                 else
                                     handDiv.appendChild(emel);
-                            })
+                            });
                     }
                     else if (data.cmd == "judge")
                     {
@@ -249,7 +254,30 @@ var cableFunc =
                     }
                     else if (data.cmd == "show-em")
                     {
+                        field.innerHTML = "";
+                        data.all.forEach(
+                            player =>
+                            {
+                                // skip self
+                                if (player.player == gameState.player) return;
 
+                                let d = document.createElement("div");
+                                player.art.forEach(
+                                    emoji =>
+                                    {
+                                        var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
+                                        emel.innerHTML = emoji.raw;
+                                        emel.title = emoji.name;
+                                        var style = text2CSS(emoji.position);
+                                        emel.style.left = style.left;
+                                        emel.style.top = style.top;
+                                        emel.style.position = style.position;
+                                        if (style["--scale"]) emel.style["--scale"] = style["--scale"];
+                                        d.appendChild(emel);
+                                    });
+                                field.appendChild(d);
+                            }
+                        )
                     }
                 }
             }

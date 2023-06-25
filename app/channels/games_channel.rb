@@ -53,7 +53,7 @@ class GamesChannel < ApplicationCable::Channel
     Thread.new do
       Rails.application.executor.wrap do
         # your code here
-        30.step(1, -5) do |i|
+        5.step(5, -5) do |i|
           ActionCable.server.broadcast(params[:game_id], { cmd: "countdown", time: i });
           sleep 5
         end
