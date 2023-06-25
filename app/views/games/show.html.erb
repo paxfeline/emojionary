@@ -428,6 +428,12 @@ game.addEventListener("pointerup",
                                 //console.log("hit", hit);
                                 d.insertBefore(t, hit);
                                 gameState.dragging = null;
+
+                                // send update
+                                var em = gameState.hand.find( el => el.name == t.title );
+                                em.position = t.getAttribute("style");
+
+                                App.subc.perform("update", { hand: gameState.hand });
                                 return;
                             }
                         }
