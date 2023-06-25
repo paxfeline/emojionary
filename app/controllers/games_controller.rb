@@ -7,7 +7,7 @@ class GamesController < ApplicationController
     #debugger
 
     @game = Game.find(params[:game_id])
-    puts @game.inspect
+    #puts @game.inspect
 
     #debugger
 
@@ -22,7 +22,7 @@ class GamesController < ApplicationController
         session[:player_id] = @user.id
         cookies[:emoji_game_player_id] = @user.id
 
-        puts @user.inspect
+        #puts @user.inspect
       else
         render :index, status: :unprocessable_entity
       end
@@ -60,10 +60,12 @@ class GamesController < ApplicationController
         redirect_to "/play?game_id=#{@game.id}"
       else
         puts "game save fail"
+        puts @game.errors.full_messages
         render :index, status: :unprocessable_entity
       end
     else
       puts "judge save fail"
+      puts @game.errors.full_messages
       render :index, status: :unprocessable_entity
     end
   end
