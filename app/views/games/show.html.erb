@@ -286,20 +286,20 @@ var cableFunc =
                                         if (style["--scale"]) emel.style["--scale"] = style["--scale"];
                                         d.appendChild(emel);
 
-                                        emel.dataset.player = player.id;
-                                        gameState.gallery[player.id] = emel;
-
-                                        // allow judge to pick winner
-                                        if (gameState.role == "judge")
-                                        {
-                                            emel.addEventListener("click",
-                                                e =>
-                                                {
-                                                    console.log("pick player", player);
-                                                    App.subc.perform("pick", { player: player.id });
-                                                });
-                                        }
+                                        //emel.dataset.player = player.id;
                                     });
+
+                                // allow judge to pick winner
+                                gameState.gallery[player.player] = d;
+                                if (gameState.role == "judge")
+                                {
+                                    d.addEventListener("click",
+                                        e =>
+                                        {
+                                            console.log("pick player", player);
+                                            App.subc.perform("pick", { player: player.player });
+                                        });
+                                }
                                 field.appendChild(d);
                             }
                         )
