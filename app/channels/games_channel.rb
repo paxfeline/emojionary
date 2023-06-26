@@ -72,6 +72,29 @@ class GamesChannel < ApplicationCable::Channel
   def pick(data)
     game = Game.find(params[:game_id])
     ActionCable.server.broadcast(params[:game_id], { cmd: "pick", player: data["player"] });
+
+    Thread.new do
+      Rails.application.executor.wrap do
+        sleep 5
+
+        judge = game.players.order(Arel.sql('last_judged IS NOT NULL, last_judged')).first        
+        judge.last_judged = Time.now.to_datetime
+        game.prompt = Prompt.all.sample
+        game.judge = judge;
+        
+        if judge.save && game.save
+          o = game.players.inject([]) do |acc, pl|
+            acc.append({player: pl.id, role: pl.id == judge.id ? "judge" : "artist"})
+          end
+          ActionCable.server.broadcast(params[:game_id], { cmd: "new-round", all: o });
+        else
+          puts "new round fail"
+          puts judge.errors.full_messages
+          puts game.errors.full_messages
+        end
+      end
+    end
+
   end
 
   def update(data)

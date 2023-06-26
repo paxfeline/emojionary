@@ -43,12 +43,14 @@ class GamesController < ApplicationController
     else
       @judge = Player.new
     end
+    
+    puts "judge at #{Time.now.to_datetime}"
+    @judge.last_judged = Time.now.to_datetime
 
     @game.prompt = Prompt.all.sample
 
     #debugger
 
-    # sometimes don't need to save judge
     if @judge.save
       @game.judge = @judge
       if @game.save

@@ -215,6 +215,13 @@ var cableFunc =
                 // Called when there's incoming data on the websocket for this channel
                     console.log("cable incoming", data);
 
+                    // fix up new round command
+                    if (data.cmd == "new-round")
+                    {
+                        data.cmd = data.all.find( el => el.player == gameState.player ).role;
+                        console.log("new round role:", data.cmd);
+                    }
+
                     if (data.cmd == "id")
                     {
                         gameState.player = data.id;
@@ -248,9 +255,13 @@ var cableFunc =
                     else if (data.cmd == "judge")
                     {
                         gameState.role = "judge";
+                        gameState.chosen = undefined;
+
+                        field.innerHTML = "";
 
                         gameDiv.classList.add("gone")
                         judgeDiv.classList.remove("gone")
+                        judgePanelDiv.classList.remove("gone");
                     }
                     else if (data.cmd == "artist")
                     {
@@ -266,8 +277,8 @@ var cableFunc =
                     else if (data.cmd == "show-em")
                     {
                         gameDiv.classList.add("gone");
-                        judgePanelDiv.classList.add("gone");
                         judgeDiv.classList.remove("gone");
+                        judgePanelDiv.classList.add("gone");
 
                         field.innerHTML = "";
                         gameState.gallery = {}
@@ -298,8 +309,10 @@ var cableFunc =
                                     d.addEventListener("click",
                                         e =>
                                         {
+                                            if (gameState.chosen) return;
                                             console.log("pick player", player);
                                             App.subc.perform("pick", { player: player.player });
+                                            gameState.chosen = player.player;
                                         });
                                 }
                                 field.appendChild(d);
