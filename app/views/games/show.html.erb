@@ -268,6 +268,7 @@ var cableFunc =
                         judgeDiv.classList.remove("gone");
 
                         field.innerHTML = "";
+                        gameState.gallery = {}
                         data.all.forEach(
                             player =>
                             {
@@ -284,10 +285,28 @@ var cableFunc =
                                         emel.style.position = style.position;
                                         if (style["--scale"]) emel.style["--scale"] = style["--scale"];
                                         d.appendChild(emel);
+
+                                        emel.dataset.player = player.id;
+                                        gameState.gallery[player.id] = emel;
+
+                                        // allow judge to pick winner
+                                        if (gameState.role == "judge")
+                                        {
+                                            emel.addEventListener("click",
+                                                e =>
+                                                {
+                                                    console.log("pick player", player);
+                                                    App.subc.perform("pick", { player: player.id });
+                                                });
+                                        }
                                     });
                                 field.appendChild(d);
                             }
                         )
+                    }
+                    else if (data.cmd == "pick")
+                    {
+                        gameState.gallery[data.player].style.border = "5px solid red";
                     }
                 }
             }
@@ -310,8 +329,8 @@ game.addEventListener("pointerdown",
 
         if (role == "dragitem")
         {
-            gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
             e.preventDefault();
+            gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
             game.setPointerCapture(e.pointerId);
             gameState.dragging = e.target.cloneNode(true);
             gameState.dragOrig = e.target;

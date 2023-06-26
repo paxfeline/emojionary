@@ -58,7 +58,7 @@ class GamesChannel < ApplicationCable::Channel
           sleep 5
         end
         ActionCable.server.broadcast(params[:game_id], { cmd: "countdown", time: 0 });
-        o = game.game_states.all.select { |j| debugger; puts "#{j.player_id} ?? #{game.judge_id}"; j.player_id != game.judge_id }
+        o = game.game_states.all.select { |j| j.player_id != game.judge_id }
           .inject([]) do |acc, gs|
             t = JSON.parse(gs.state).select { |el| el["position"].present? }
             acc.append({player: gs.player_id, art: t})
@@ -69,8 +69,9 @@ class GamesChannel < ApplicationCable::Channel
     end
   end
 
-  def judge_select_choice
-
+  def pick(data)
+    game = Game.find(params[:game_id])
+    ActionCable.server.broadcast(params[:game_id], { cmd: "pick", player: data["player"] });
   end
 
   def update(data)
