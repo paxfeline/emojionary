@@ -11,15 +11,14 @@ class GamesController < ApplicationController
 
     #debugger
 
-    if session[:player_id].present?
-      @user = Player.find_by(id: session[:player_id])
+    if cookies[:emoji_game_player_id].present?
+      @user = Player.find_by(id: cookies[:emoji_game_player_id])
     end
 
     if @user.nil?
       @user = Player.new
 
       if @user.save
-        session[:player_id] = @user.id
         cookies[:emoji_game_player_id] = @user.id
 
         #puts @user.inspect
@@ -35,10 +34,10 @@ class GamesController < ApplicationController
     @game = Game.new(game_params)
 
     # find or create player
-    if session[:player_id].present?
-      @judge = Player.find_by(id: session[:player_id])
+    if cookies[:emoji_game_player_id].present?
+      @judge = Player.find_by(id: cookies[:emoji_game_player_id])
       if @judge.nil?
-        session[:player_id] = nil
+        cookies[:emoji_game_player_id] = nil
         @judge = Player.new
       end
     else
@@ -53,8 +52,7 @@ class GamesController < ApplicationController
     if @judge.save
       @game.judge = @judge
       if @game.save
-        if session[:player_id].nil?
-          session[:player_id] = @judge.id
+        if cookies[:emoji_game_player_id].nil?
           cookies[:emoji_game_player_id] = @judge.id
         end
         redirect_to "/play?game_id=#{@game.id}"
