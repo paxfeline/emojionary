@@ -126,6 +126,43 @@ body
     outline: 1px solid black;
 }
 
+#countdown
+{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#countdown > div
+{
+    animation: 1s ease-out bloom;
+}
+
+@keyframes bloom
+{
+    from
+    {
+        transform: scale(1);
+        opacity: 100%;
+    }
+
+    60%
+    {
+        opacity: 100%;
+    }
+
+    to
+    {
+        transform: scale(50);
+        opacity: 0%;
+    }
+}
+
 </style>
 
 <div style="position: absolute; bottom: 0; right: 0; background-color: rgba(255, 255, 255, 0.8);">
@@ -146,6 +183,7 @@ body
 <div id="judge">
     <div id="judge-panel">
         <button
+            style="font-size: 72pt;"
             onclick="startCountdown()">
             Start Countdown
         </button>
@@ -153,6 +191,8 @@ body
     <div id="countdown"></div>
     <div id="field"></div>
 </div>
+
+<div id="countdown"></div>
 
 <template id="emoji-piece-template">
     <span class="dragitem"  data-role="dragitem"></span>
@@ -175,6 +215,7 @@ var judgeDiv = document.querySelector("#judge");
 var judgePanelDiv = document.querySelector("#judge-panel");
 var countdownDiv = document.querySelector("#countdown");
 var fieldDiv = document.querySelector("#field");
+var countdownDiv = document.querySelector("#countdown");
 
 window.App = window.App || {}
 
@@ -272,7 +313,11 @@ var cableFunc =
                     }
                     else if (data.cmd == "countdown")
                     {
-                        console.log(data);
+                        //console.log(data);
+                        let nd = document.createElement("div");
+                        nd.innerHTML = data.time;
+                        countdownDiv.appendChild(nd);
+                        nd.addEventListener("animationend", () => nd.remove());
                     }
                     else if (data.cmd == "show-em")
                     {
