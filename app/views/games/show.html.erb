@@ -189,7 +189,6 @@ body
             Start Countdown
         </button>
     </div>
-    <div id="countdown"></div>
     <div id="field"></div>
 </div>
 
@@ -214,7 +213,6 @@ var boardDiv = document.querySelector("#board");
 var gameDiv = document.querySelector("#game");
 var judgeDiv = document.querySelector("#judge");
 var judgePanelDiv = document.querySelector("#judge-panel");
-var countdownDiv = document.querySelector("#countdown");
 var fieldDiv = document.querySelector("#field");
 var countdownDiv = document.querySelector("#countdown");
 
@@ -314,7 +312,9 @@ var cableFunc =
                     }
                     else if (data.cmd == "countdown")
                     {
-                        //console.log(data);
+                        if (document.visibilityState == "hidden") return;
+
+                        console.log("countdown", data);
                         let nd = document.createElement("div");
                         nd.innerHTML = data.time;
                         countdownDiv.appendChild(nd);
