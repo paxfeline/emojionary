@@ -164,6 +164,20 @@ body
     }
 }
 
+#menu
+{
+    position: absolute;
+    padding: 0.3em;
+    background-color: lightgrey;
+    border: 0.25em outset grey;
+    border-radius: 0.25em;
+}
+
+#menu > div:hover
+{
+    background-color: lightblue;
+}
+
 </style>
 
 <div style="position: absolute; bottom: 0; right: 0; background-color: rgba(255, 255, 255, 0.8);">
@@ -192,6 +206,11 @@ body
     <div id="field"></div>
 </div>
 
+<div id="menu" class="gone">
+<div id="change-scale" onclick="scaleEmoji(this);">Scale Emoji</div>
+<div id="trade-in">Trade In Emoji</div>
+</div>
+
 <div id="countdown"></div>
 
 <template id="emoji-piece-template">
@@ -215,6 +234,7 @@ var judgeDiv = document.querySelector("#judge");
 var judgePanelDiv = document.querySelector("#judge-panel");
 var fieldDiv = document.querySelector("#field");
 var countdownDiv = document.querySelector("#countdown");
+var menuDiv = document.querySelector("#menu");
 
 window.App = window.App || {}
 
@@ -222,6 +242,30 @@ function startCountdown()
 {
 
     App.subc.perform("start_countdown");
+}
+
+function closeMenu()
+{
+    menuDiv.classList.add("gone");
+    gameState.menuOpen = false;
+}
+
+function scaleEmoji()
+{
+    emel = gameState.menuTarget;
+
+    let s = prompt("Enter scale factor as a decimal, (e.g. 0.75):");
+    if (!s) return;
+    let sf = Number(s);
+    emel.style.setProperty("--scale", sf);
+
+    // send update
+    var em = gameState.hand.find( el => el.name == emel.title );
+    em.position = emel.getAttribute("style");
+
+    App.subc.perform("update", { hand: gameState.hand });
+
+    closeMenu();
 }
 
 var cableFunc =
@@ -385,36 +429,71 @@ var gameState = {};
 game.addEventListener("pointerdown",
     e =>
     {
-        //console.log("pd", e);
+        console.log("pd", gameState.menuOpen, e);
 
-        var role = e.target.dataset.role;
-
-        if (role == "dragitem")
+        // close menu if open
+        if (gameState.menuOpen)
         {
-            e.preventDefault();
-            gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
-            game.setPointerCapture(e.pointerId);
-            gameState.dragging = e.target.cloneNode(true);
-            gameState.dragOrig = e.target;
-            e.target.parentNode.appendChild(gameState.dragging);
-            e.target.classList.add("vis-hid");
-            //console.log(gameState.dragging.classList);
-            gameState.dragging.classList.add("dragitem-dragging");
-            gameState.start = {x: e.pageX, y: e.pageY};
-            gameState.dragging.dataset.x = e.target.offsetLeft - e.target.parentNode.scrollLeft;
-            gameState.dragging.dataset.y = e.target.offsetTop; // + e.target.parentNode.offsetTop;
-            gameState.dragging.style.left = `${gameState.dragging.dataset.x}px`;
-            gameState.dragging.style.top = `${gameState.dragging.dataset.y}px`;
+            closeMenu();
+            return;
         }
+
+        gameState.clickCache = e.target;
     }
 );
+
+// this will fire as long as we don't preventDefault from pointerdown
+// instead it's called from pointermove (got that from some MDN page)
+game.addEventListener("dblclick",
+    e =>
+    {
+        console.log("DBLCLK", e);
+
+        if (e.target.dataset.role != "dragitem") return;
+
+        gameState.menuTarget = e.target;
+
+        menuDiv.style.left = `${e.clientX}px`;
+        menuDiv.style.top = `${e.clientY}px`;
+
+        menuDiv.classList.remove("gone");
+
+        gameState.menuOpen = true;
+    });
 
 game.addEventListener("pointermove",
     e =>
     {
+        //console.log("pm", gameState.dragging);
+        
+        // delay this until drag actually starts
+        if (gameState.clickCache && !gameState.dragging)
+        {
+            // start drag
+            var role = gameState.clickCache.dataset.role;
+
+            if (role == "dragitem")
+            {
+                gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
+                game.setPointerCapture(e.pointerId);
+                gameState.dragging = e.target.cloneNode(true);
+                gameState.dragOrig = e.target;
+                e.target.parentNode.appendChild(gameState.dragging);
+                e.target.classList.add("vis-hid");
+                //console.log(gameState.dragging.classList);
+                gameState.dragging.classList.add("dragitem-dragging");
+                gameState.start = {x: e.pageX, y: e.pageY};
+                gameState.dragging.dataset.x = e.target.offsetLeft - e.target.parentNode.scrollLeft;
+                gameState.dragging.dataset.y = e.target.offsetTop; // + e.target.parentNode.offsetTop;
+                gameState.dragging.style.left = `${gameState.dragging.dataset.x}px`;
+                gameState.dragging.style.top = `${gameState.dragging.dataset.y}px`;
+            }
+        }
+
         if (!gameState.dragging) return;
 
-        //console.log("pm", e.target.dataset.role, e);
+        e.preventDefault();
+
 
         var hits = document.elementsFromPoint(e.clientX, e.clientY);
 
@@ -461,7 +540,9 @@ function getLeft(elem)
 game.addEventListener("pointerup",
     e =>
     {
-        //console.log("pu", e.target.dataset.role, e);
+        console.log("pu", e.target.dataset.role, e);
+
+        gameState.clickCache = null;
 
         game.releasePointerCapture(e.pointerId);
 
