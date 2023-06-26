@@ -142,10 +142,12 @@ body
 </div>
 
 <div id="judge">
-    <button
-        onclick="startCountdown()">
-        Start Countdown
-    </button>
+    <div id="judge-panel">
+        <button
+            onclick="startCountdown()">
+            Start Countdown
+        </button>
+    </div>
     <div id="countdown"></div>
     <div id="field"></div>
 </div>
@@ -168,6 +170,7 @@ var handDiv = document.querySelector("#hand");
 var boardDiv = document.querySelector("#board");
 var gameDiv = document.querySelector("#game");
 var judgeDiv = document.querySelector("#judge");
+var judgePanelDiv = document.querySelector("#judge-panel");
 var countdownDiv = document.querySelector("#countdown");
 var fieldDiv = document.querySelector("#field");
 
@@ -242,13 +245,17 @@ var cableFunc =
                     }
                     else if (data.cmd == "judge")
                     {
+                        gameState.role = "judge";
+
                         gameDiv.classList.add("gone")
                         judgeDiv.classList.remove("gone")
                     }
                     else if (data.cmd == "artist")
                     {
-                        gameDiv.classList.remove("gone")
-                        judgeDiv.classList.add("gone")
+                        gameState.role = "artist";
+
+                        gameDiv.classList.remove("gone");
+                        judgeDiv.classList.add("gone");
                     }
                     else if (data.cmd == "countdown")
                     {
@@ -256,16 +263,14 @@ var cableFunc =
                     }
                     else if (data.cmd == "show-em")
                     {
-                        gameDiv.classList.add("gone")
-                        judgeDiv.classList.remove("gone")
-                        
+                        gameDiv.classList.add("gone");
+                        judgePanelDiv.classList.add("gone");
+                        judgeDiv.classList.remove("gone");
+
                         field.innerHTML = "";
                         data.all.forEach(
                             player =>
                             {
-                                // skip self
-                                if (player.player == gameState.player) return;
-
                                 let d = document.createElement("div");
                                 player.art.forEach(
                                     emoji =>

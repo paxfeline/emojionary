@@ -58,11 +58,12 @@ class GamesChannel < ApplicationCable::Channel
           sleep 5
         end
         ActionCable.server.broadcast(params[:game_id], { cmd: "countdown", time: 0 });
-        o = game.game_states.all.inject([]) do |acc, gs|
-          t = JSON.parse(gs.state).select { |el| el["position"].present? }
-          acc.append({player: gs.player_id, art: t})
-          acc
-        end
+        o = game.game_states.all.select { |j| debugger; puts "#{j.player_id} ?? #{game.judge_id}"; j.player_id != game.judge_id }
+          .inject([]) do |acc, gs|
+            t = JSON.parse(gs.state).select { |el| el["position"].present? }
+            acc.append({player: gs.player_id, art: t})
+            acc
+          end
         ActionCable.server.broadcast(params[:game_id], { cmd: "show-em", all: o });
       end
     end
