@@ -367,7 +367,8 @@ var cableFunc =
                     }
                     else if (data.cmd == "pick")
                     {
-                        gameState.gallery[data.player].style.border = "5px solid red";
+                        gameState.gallery[data.player].style.outline = "5px solid red";
+                        gameState.gallery[data.player].style.backgroundColor = "pink";
                     }
                 }
             }
