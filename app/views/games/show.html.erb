@@ -228,9 +228,9 @@ function text2CSS(text)
 
 }
 
+var gameDiv = document.querySelector("#game");
 var handDiv = document.querySelector("#hand");
 var boardDiv = document.querySelector("#board");
-var gameDiv = document.querySelector("#game");
 var judgeDiv = document.querySelector("#judge");
 var judgePanelDiv = document.querySelector("#judge-panel");
 var fieldDiv = document.querySelector("#field");
@@ -427,6 +427,9 @@ else
 
 var gameState = {};
 
+// prevent browser contextual menu
+game.addEventListener("contextmenu", e => e.preventDefault());
+
 game.addEventListener("pointerdown",
     e =>
     {
@@ -439,28 +442,35 @@ game.addEventListener("pointerdown",
             return;
         }
 
-        gameState.clickCache = e.target;
-    }
-);
+        gameState.start = {x: e.pageX, y: e.pageY};
 
-// this will fire as long as we don't preventDefault from pointerdown
-// instead it's called from pointermove (got that from some MDN page)
-game.addEventListener("dblclick",
-    e =>
-    {
-        console.log("DBLCLK", e);
+        gameState.clickCache = e.target;
+        gameState.clickTime = Date.now();
+        gameState.distance = 0;
 
         if (e.target.dataset.role != "dragitem") return;
 
-        gameState.menuTarget = e.target;
+        gameState.menuTimer = setTimeout(
+            () =>
+            {
+                if (gameState.distance < 20)
+                {
+                    gameState.menuTarget = e.target;
 
-        menuDiv.style.left = `${e.clientX}px`;
-        menuDiv.style.top = `${e.clientY}px`;
+                    menuDiv.style.left = `${e.clientX}px`;
+                    menuDiv.style.top = `${e.clientY}px`;
 
-        menuDiv.classList.remove("gone");
+                    menuDiv.classList.remove("gone");
 
-        gameState.menuOpen = true;
-    });
+                    gameState.menuOpen = true;
+
+                    gameState.menuTimer = null;
+                }
+            },
+            500
+        );
+    }
+);
 
 game.addEventListener("pointermove",
     e =>
@@ -483,7 +493,6 @@ game.addEventListener("pointermove",
                 e.target.classList.add("vis-hid");
                 //console.log(gameState.dragging.classList);
                 gameState.dragging.classList.add("dragitem-dragging");
-                gameState.start = {x: e.pageX, y: e.pageY};
                 gameState.dragging.dataset.x = e.target.offsetLeft - e.target.parentNode.scrollLeft;
                 gameState.dragging.dataset.y = e.target.offsetTop; // + e.target.parentNode.offsetTop;
                 gameState.dragging.style.left = `${gameState.dragging.dataset.x}px`;
@@ -494,7 +503,6 @@ game.addEventListener("pointermove",
         if (!gameState.dragging) return;
 
         e.preventDefault();
-
 
         var hits = document.elementsFromPoint(e.clientX, e.clientY);
 
@@ -523,6 +531,13 @@ game.addEventListener("pointermove",
 
         t.style.left = `${Number(t.dataset.x) + (e.pageX - gameState.start.x)}px`;
         t.style.top = `${Number(t.dataset.y) + (e.pageY - gameState.start.y)}px`;
+
+        // get distance for showing menu
+        let curd = Math.sqrt(
+            Math.abs(gameState.start.x - e.pageX) ** 2 +
+            Math.abs(gameState.start.y - e.pageY) ** 2
+        );
+        gameState.distance = Math.max(gameState.distance, curd);
     }
 );
 
@@ -542,6 +557,12 @@ game.addEventListener("pointerup",
     e =>
     {
         console.log("pu", e.target.dataset.role, e);
+
+        if (gameState.menuTimer)
+        {
+            clearTimeout(gameState.menuTimer);
+            gameState.menuTimer = null;
+        }
 
         gameState.clickCache = null;
 
