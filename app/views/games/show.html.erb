@@ -173,11 +173,30 @@ body
     border: 0.25em outset grey;
     border-radius: 0.25em;
     z-index: 20;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    font-size: 10vmin;
+}
+
+#menu-emoji
+{
+    font-size: 25vmin;
+    text-align: center;
 }
 
 #menu > div:hover
 {
     background-color: lightblue;
+}
+
+#close-menu
+{
+    position: absolute;
+    bottom: 0;
+    width: calc(100% - 0.6em); /* minus padding */
 }
 
 </style>
@@ -211,8 +230,10 @@ body
 </div>
 
 <div id="menu" class="gone">
+<div id="menu-emoji"></div>
 <div id="change-scale" onclick="scaleEmoji(this);">Scale Emoji</div>
 <div id="trade-in">Trade In Emoji</div>
+<div id="close-menu" onclick="closeMenu();">Close</div>
 </div>
 
 <div id="countdown"></div>
@@ -239,6 +260,7 @@ var judgePanelDiv = document.querySelector("#judge-panel");
 var fieldDiv = document.querySelector("#field");
 var countdownDiv = document.querySelector("#countdown");
 var menuDiv = document.querySelector("#menu");
+var menuEmojiDiv = document.querySelector("#menu-emoji");
 var promptDiv = document.querySelector("#prompt");
 
 window.App = window.App || {}
@@ -444,12 +466,8 @@ game.addEventListener("pointerdown",
     {
         console.log("pd", gameState.menuOpen, e);
 
-        // close menu if open
-        if (gameState.menuOpen)
-        {
-            closeMenu();
-            return;
-        }
+        // ignore if menu open
+        if (gameState.menuOpen) return;
 
         gameState.start = {x: e.pageX, y: e.pageY};
 
@@ -467,8 +485,10 @@ game.addEventListener("pointerdown",
             {
                 if (gameState.distance < 20)
                 {
-                    menuDiv.style.left = `${e.clientX}px`;
-                    menuDiv.style.top = `${e.clientY}px`;
+                    // stop dragging
+                    gameState.clickCache = null;
+
+                    menuEmojiDiv.innerHTML = e.target.innerHTML;
 
                     menuDiv.classList.remove("gone");
 
@@ -477,7 +497,7 @@ game.addEventListener("pointerdown",
                     gameState.menuTimer = null;
                 }
             },
-            500
+            1000 // one sec
         );
     }
 );
@@ -631,6 +651,8 @@ game.addEventListener("pointerup",
 
                         t.classList.remove("dragitem-dragging");
             
+                        /* don't bother:
+
                         // find item dropped on
                         while ( hit = hits.pop() )
                         {
@@ -648,6 +670,8 @@ game.addEventListener("pointerup",
                                 return;
                             }
                         }
+                        */
+
                         //debugger;
                         gameState.dragging = null;
                         d.appendChild(t);
