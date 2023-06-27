@@ -90,14 +90,14 @@ class GamesChannel < ApplicationCable::Channel
           end
           
           # prompt
-          self.prompt = Prompt.all.sample
+          game.prompt = Prompt.all.sample
           # use usedprompt
           up = UsedPrompt.new
-          up.prompt = self.prompt
-          up.game = self
+          up.prompt = game.prompt
+          up.game = game
           up.save
           
-          ActionCable.server.broadcast(params[:game_id], { cmd: "new-round", all: o, prompt: self.prompt.prompt });
+          ActionCable.server.broadcast(params[:game_id], { cmd: "new-round", all: o, prompt: game.prompt.prompt });
         else
           puts "new round fail"
           puts judge.errors.full_messages
