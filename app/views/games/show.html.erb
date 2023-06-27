@@ -387,7 +387,7 @@ var cableFunc =
                                         emel.style.left = style.left;
                                         emel.style.top = style.top;
                                         emel.style.position = style.position;
-                                        if (style["--scale"]) emel.style["--scale"] = style["--scale"];
+                                        if (style["--scale"]) emel.style.setProperty("--scale", style["--scale"]);
                                         d.appendChild(emel);
 
                                         //emel.dataset.player = player.id;
