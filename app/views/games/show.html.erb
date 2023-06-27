@@ -172,6 +172,7 @@ body
     background-color: lightgrey;
     border: 0.25em outset grey;
     border-radius: 0.25em;
+    z-index: 20;
 }
 
 #menu > div:hover
@@ -253,7 +254,7 @@ function closeMenu()
 
 function scaleEmoji()
 {
-    emel = gameState.menuTarget;
+    emel = gameState.pointerTarget;
 
     let s = prompt("Enter scale factor as a decimal, (e.g. 0.75):");
     if (!s) return;
@@ -450,13 +451,14 @@ game.addEventListener("pointerdown",
 
         if (e.target.dataset.role != "dragitem") return;
 
+        // will likely be overwritten by pm wiggle
+        gameState.pointerTarget = e.target;
+
         gameState.menuTimer = setTimeout(
             () =>
             {
                 if (gameState.distance < 20)
                 {
-                    gameState.menuTarget = e.target;
-
                     menuDiv.style.left = `${e.clientX}px`;
                     menuDiv.style.top = `${e.clientY}px`;
 
@@ -478,6 +480,8 @@ game.addEventListener("pointermove",
         //console.log("pm", gameState.dragging);
         
         // delay this until drag actually starts
+        // clickCache comes from pointerdown
+        // will be equal to e.target
         if (gameState.clickCache && !gameState.dragging)
         {
             // start drag
@@ -488,6 +492,7 @@ game.addEventListener("pointermove",
                 gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
                 game.setPointerCapture(e.pointerId);
                 gameState.dragging = e.target.cloneNode(true);
+                gameState.pointerTarget = gameState.dragging;
                 gameState.dragOrig = e.target;
                 e.target.parentNode.appendChild(gameState.dragging);
                 e.target.classList.add("vis-hid");
@@ -604,6 +609,7 @@ game.addEventListener("pointerup",
                     // items in hand should have no style attribute
                     t.removeAttribute("style");
 
+                    /*
                     if (gameState.fromHand)
                     {
                         gameState.dragOrig.classList.remove("vis-hid");
@@ -612,6 +618,7 @@ game.addEventListener("pointerup",
                     }
                     else
                     {
+                        */
                         gameState.dragOrig.remove();
 
                         t.classList.remove("dragitem-dragging");
@@ -636,7 +643,7 @@ game.addEventListener("pointerup",
                         //debugger;
                         gameState.dragging = null;
                         d.appendChild(t);
-                    }
+                    //}
                 }
                 else
                 {
