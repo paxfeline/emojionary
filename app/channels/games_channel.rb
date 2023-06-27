@@ -89,13 +89,14 @@ class GamesChannel < ApplicationCable::Channel
             acc.append({player: pl.id, role: pl.id == judge.id ? "judge" : "artist"})
           end
           
-          # prompt
-          game.prompt = Prompt.all.sample
           # use usedprompt
           up = UsedPrompt.new
           up.prompt = game.prompt
           up.game = game
           up.save
+          
+          # prompt
+          game.prompt = Prompt.all.sample
           
           ActionCable.server.broadcast(params[:game_id], { cmd: "new-round", all: o, prompt: game.prompt.prompt });
         else

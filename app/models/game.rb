@@ -1,5 +1,5 @@
 class Game < ApplicationRecord
-    after_create :game_setup
+    before_validation :game_setup
 
     has_many :game_states
     has_many :players, through: :game_states
@@ -61,12 +61,12 @@ private
         # prompt
         self.prompt = Prompt.all.sample
         
-        up = UsedPrompt.new
-        up.prompt = self.prompt
-        up.game = self
-        up.save
+        #up = UsedPrompt.new
+        #up.prompt = self.prompt
+        #up.game = self
+        #up.save
 
         #puts self.inspect
-        self.save
+        #self.save
     end
 end
