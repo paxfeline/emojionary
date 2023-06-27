@@ -116,7 +116,6 @@ body
 {
     display: grid;
     grid-template-columns: 50vw 50vw;
-    transform: scale(var(--flipX, 1), var(--flipY, 1));
     --base-size: 7.5vw;
 }
 
@@ -125,6 +124,12 @@ body
     height: 25vw;
     position: relative;
     outline: 1px solid black;
+}
+
+#field > div > span
+{
+    font-size: calc(var(--base-size) * var(--scale, 1));
+    transform: scale(var(--flipX, 1), var(--flipY, 1));
 }
 
 #countdown
@@ -379,9 +384,10 @@ var cableFunc =
                                     emel.style.left = style.left;
                                     emel.style.top = style.top;
                                     emel.style.position = style.position;
-                                    if (style["--scale"]) emel.style.setProperty("--scale", style["--scale"]);
-                                    if (style["--flipX"]) emel.style.setProperty("--flipX", style["--flipX"]);
-                                    if (style["--flipY"]) emel.style.setProperty("--flipY", style["--flipY"]);
+                                    if (style.getPropertyValue("--scale")) emel.style.setProperty("--scale", style.getPropertyValue("--scale"));
+                                    if (style.getPropertyValue("--flipX")) emel.style.setProperty("--flipX", style.getPropertyValue("--flipX"));
+                                    if (style.getPropertyValue("--flipY")) emel.style.setProperty("--flipY", style.getPropertyValue("--flipY"));
+                                    //console.log(style.getPropertyValue("--flipY"), emel.style.getPropertyValue("--flipY"));
                                     boardDiv.appendChild(emel);
                                 }
                                 else
@@ -438,9 +444,9 @@ var cableFunc =
                                         emel.style.left = style.left;
                                         emel.style.top = style.top;
                                         emel.style.position = style.position;
-                                        if (style["--scale"]) emel.style.setProperty("--scale", style["--scale"]);
-                                        if (style["--flipX"]) emel.style.setProperty("--flipX", style["--flipX"]);
-                                        if (style["--flipY"]) emel.style.setProperty("--flipY", style["--flipY"]);
+                                        if (style.getPropertyValue("--scale")) emel.style.setProperty("--scale", style.getPropertyValue("--scale"));
+                                        if (style.getPropertyValue("--flipX")) emel.style.setProperty("--flipX", style.getPropertyValue("--flipX"));
+                                        if (style.getPropertyValue("--flipY")) emel.style.setProperty("--flipY", style.getPropertyValue("--flipY"));
                                         d.appendChild(emel);
 
                                         //emel.dataset.player = player.id;
