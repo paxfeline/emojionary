@@ -53,14 +53,18 @@ private
                         end
                 }
             end
+
         #debugger
+
         self.deck = deck.to_json
 
         # prompt
+        self.prompt = Prompt.all.sample
         
         up = UsedPrompt.new
         up.prompt = self.prompt
         up.game = self
+        up.save
 
         #puts self.inspect
         self.save

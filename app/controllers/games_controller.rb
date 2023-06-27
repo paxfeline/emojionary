@@ -47,8 +47,6 @@ class GamesController < ApplicationController
     puts "judge at #{Time.now.to_datetime}"
     @judge.last_judged = Time.now.to_datetime
 
-    @game.prompt = Prompt.all.sample
-
     #debugger
 
     if @judge.save

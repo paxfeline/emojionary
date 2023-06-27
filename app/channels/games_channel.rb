@@ -40,6 +40,8 @@ class GamesChannel < ApplicationCable::Channel
 
     transmit( { cmd: "hand", hand: hand } )
 
+    transmit( { cmd: "prompt", prompt: game.prompt.prompt })
+
     puts "--end transmission--"
   end  
 
@@ -86,7 +88,16 @@ class GamesChannel < ApplicationCable::Channel
           o = game.players.inject([]) do |acc, pl|
             acc.append({player: pl.id, role: pl.id == judge.id ? "judge" : "artist"})
           end
-          ActionCable.server.broadcast(params[:game_id], { cmd: "new-round", all: o });
+          
+          # prompt
+          self.prompt = Prompt.all.sample
+          # use usedprompt
+          up = UsedPrompt.new
+          up.prompt = self.prompt
+          up.game = self
+          up.save
+          
+          ActionCable.server.broadcast(params[:game_id], { cmd: "new-round", all: o, prompt: self.prompt.prompt });
         else
           puts "new round fail"
           puts judge.errors.full_messages

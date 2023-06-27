@@ -183,9 +183,11 @@ body
 </style>
 
 <div style="position: absolute; bottom: 0; right: 0; background-color: rgba(255, 255, 255, 0.8);">
+    <%= @game.title %>
+</div>
 
-<%= @game.title %>
-
+<div style="position: absolute; bottom: 0; left: 0; background-color: rgba(255, 255, 255, 0.8); z-index: 15;">
+<h2>emoji <span id="prompt"></span></h2>
 </div>
 
 <div id="game">
@@ -237,6 +239,7 @@ var judgePanelDiv = document.querySelector("#judge-panel");
 var fieldDiv = document.querySelector("#field");
 var countdownDiv = document.querySelector("#countdown");
 var menuDiv = document.querySelector("#menu");
+var promptDiv = document.querySelector("#prompt");
 
 window.App = window.App || {}
 
@@ -306,11 +309,16 @@ var cableFunc =
                     {
                         data.cmd = data.all.find( el => el.player == gameState.player ).role;
                         console.log("new round role:", data.cmd);
+                        promptDiv.innerHTML = data.prompt;
                     }
 
                     if (data.cmd == "id")
                     {
                         gameState.player = data.id;
+                    }
+                    else if (data.cmd == "prompt")
+                    {
+                        promptDiv.innerHTML = data.prompt;
                     }
                     else if (data.cmd == "hand")
                     {
