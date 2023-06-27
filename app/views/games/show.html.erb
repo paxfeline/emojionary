@@ -57,10 +57,9 @@ body
 
 .dragitem
 {
-    transition: transform 0.25s;
-    border-radius: 50%;
     line-height: 100%;
     font-size: calc(var(--base-size) * var(--scale, 1));
+    transform: scale(var(--flipX, 1), var(--flipY, 1));
 }
 
 .dropzone
@@ -183,7 +182,7 @@ body
 
 #menu-emoji
 {
-    font-size: 25vmin;
+    font-size: 15vmin;
     text-align: center;
 }
 
@@ -231,7 +230,9 @@ body
 
 <div id="menu" class="gone">
 <div id="menu-emoji"></div>
-<div id="change-scale" onclick="scaleEmoji(this);">Scale Emoji</div>
+<div id="change-scale" onclick="scaleEmoji();">Scale Emoji</div>
+<div id="change-scale" onclick="flipEmoji('X');">Flip Horizontal</div>
+<div id="change-scale" onclick="flipEmoji('Y');">Flip Vertical</div>
 <div id="trade-in">Trade In Emoji</div>
 <div id="close-menu" onclick="closeMenu();">Close</div>
 </div>
@@ -285,6 +286,22 @@ function scaleEmoji()
     if (!s) return;
     let sf = Number(s);
     emel.style.setProperty("--scale", sf);
+
+    // send update
+    var em = gameState.hand.find( el => el.name == emel.title );
+    em.position = emel.getAttribute("style");
+
+    App.subc.perform("update", { hand: gameState.hand });
+
+    closeMenu();
+}
+
+function flipEmoji(axis)
+{
+    emel = gameState.pointerTarget;
+
+    let csf = emel.style.getPropertyValue(`--flip${axis}`) || 1;
+    emel.style.setProperty(`--flip${axis}`, -csf);
 
     // send update
     var em = gameState.hand.find( el => el.name == emel.title );
@@ -362,6 +379,8 @@ var cableFunc =
                                     emel.style.top = style.top;
                                     emel.style.position = style.position;
                                     if (style["--scale"]) emel.style.setProperty("--scale", style["--scale"]);
+                                    if (style["--flipX"]) emel.style.setProperty("--flipX", style["--flipX"]);
+                                    if (style["--flipY"]) emel.style.setProperty("--flipY", style["--flipY"]);
                                     boardDiv.appendChild(emel);
                                 }
                                 else
@@ -419,6 +438,8 @@ var cableFunc =
                                         emel.style.top = style.top;
                                         emel.style.position = style.position;
                                         if (style["--scale"]) emel.style.setProperty("--scale", style["--scale"]);
+                                        if (style["--flipX"]) emel.style.setProperty("--flipX", style["--flipX"]);
+                                        if (style["--flipY"]) emel.style.setProperty("--flipY", style["--flipY"]);
                                         d.appendChild(emel);
 
                                         //emel.dataset.player = player.id;
@@ -480,25 +501,28 @@ game.addEventListener("pointerdown",
         // will likely be overwritten by pm wiggle
         gameState.pointerTarget = e.target;
 
-        gameState.menuTimer = setTimeout(
-            () =>
-            {
-                if (gameState.distance < 20)
+        if (e.target.parentNode.id == "board")
+        {
+            gameState.menuTimer = setTimeout(
+                () =>
                 {
-                    // stop dragging
-                    gameState.clickCache = null;
+                    if (gameState.distance < 20)
+                    {
+                        // stop dragging
+                        gameState.clickCache = null;
 
-                    menuEmojiDiv.innerHTML = e.target.innerHTML;
+                        menuEmojiDiv.innerHTML = e.target.innerHTML;
 
-                    menuDiv.classList.remove("gone");
+                        menuDiv.classList.remove("gone");
 
-                    gameState.menuOpen = true;
+                        gameState.menuOpen = true;
 
-                    gameState.menuTimer = null;
-                }
-            },
-            1000 // one sec
-        );
+                        gameState.menuTimer = null;
+                    }
+                },
+                1000 // one sec
+            );
+        }
     }
 );
 
