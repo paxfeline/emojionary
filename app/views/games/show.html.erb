@@ -239,7 +239,7 @@ body
 <div id="change-scale" onclick="scaleEmoji();">Scale Emoji</div>
 <div id="change-scale" onclick="flipEmoji('X');">Flip Horizontal</div>
 <div id="change-scale" onclick="flipEmoji('Y');">Flip Vertical</div>
-<div id="trade-in">Trade In Emoji</div>
+<div id="trade-in" onclick="tradeIn();">Trade In Emoji</div>
 <div id="close-menu" onclick="closeMenu();">Close</div>
 </div>
 
@@ -318,6 +318,15 @@ function flipEmoji(axis)
     closeMenu();
 }
 
+function tradeIn()
+{
+    emel = gameState.pointerTarget;
+
+    App.subc.perform("trade_in", { emoji: emel.title });
+
+    closeMenu();
+}
+
 var cableFunc =
     () =>
     {
@@ -368,7 +377,7 @@ var cableFunc =
                     {
                         handDiv.innerHTML = boardDiv.innerHTML = "";
                         console.log(data.hand);
-                        var hand = JSON.parse(data.hand);
+                        var hand = data.hand; //JSON.parse(data.hand);
                         console.log(hand);
                         gameState.hand = hand;
                         hand.forEach(

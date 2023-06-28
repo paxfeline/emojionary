@@ -9,6 +9,25 @@ class Game < ApplicationRecord
 
     belongs_to :judge, class_name: "Player"
 
+    def deal_one(deck = nil)
+        if deck.nil?
+            deck = JSON.parse self.deck
+        end
+
+        cat = deck.sample
+        ind = rand(cat["all"].size)
+        #puts cat["all"][ind]
+        r = cat["all"][ind]
+        cat["all"].delete(ind)
+
+        if deck.nil?
+            self.deck = deck
+            self.save
+        end
+
+        return r
+    end
+
     def deal
         puts "deal"
 
@@ -19,12 +38,11 @@ class Game < ApplicationRecord
         deck = JSON.parse self.deck
 
         20.times do
-            cat = deck.sample
-            ind = rand(cat["all"].size)
-            #puts cat["all"][ind]
-            hand.append cat["all"][ind]
-            cat["all"].delete(ind)
+            em = deal_one deck
+            hand.append em
         end
+
+        self.deck = deck
 
         self.save
 

@@ -42,7 +42,7 @@ class GamesChannel < ApplicationCable::Channel
     game_state.save
 
     #transmit( { cmd: "hand", hand: hand } )
-    setupMsg[:hand] = hand;
+    setupMsg[:hand] = JSON.parse(hand);
 
     #transmit( { cmd: "prompt", prompt: game.prompt.prompt })
     setupMsg[:prompt] = game.prompt.prompt
@@ -102,16 +102,27 @@ class GamesChannel < ApplicationCable::Channel
         
         if judge.save && game.save
           o = game.players.inject([]) do |acc, pl|
-            acc.append(
-              {
-                player: pl.id,
-                data:
-                  {
-                    prompt: game.prompt.prompt,
-                    role: pl.id == judge.id ? "judge" : "artist",
-                  }
-              }
-            )
+            game_state = GameState.find_by({player_id: pl.id, game_id: game.id})
+            start_hand = JSON.parse(game_state.state)
+            nec = start_hand.select { |el| el["position"].present? }.count
+            hand = start_hand.select { |el| el["position"].nil? }
+            nec.times { hand.append(game.deal_one) }
+            game_state.state = hand.to_json
+            if game_state.save
+              acc.append(
+                {
+                  player: pl.id,
+                  data:
+                    {
+                      prompt: game.prompt.prompt,
+                      role: pl.id == judge.id ? "judge" : "artist",
+                      hand: hand
+                    }
+                }
+              )
+            else
+              puts "hand update save error"
+            end
           end
           
           ActionCable.server.broadcast(params[:game_id], { broadcast: o });
@@ -137,5 +148,19 @@ class GamesChannel < ApplicationCable::Channel
     game_state = GameState.find_by({player_id: player_id, game_id: params[:game_id]})
     game_state.state = data["hand"].to_json
     game_state.save
+  end
+
+  def trade_in(data)
+    game = Game.find(params[:game_id])
+    game_state = GameState.find_by({player_id: player_id, game_id: game.id})
+    start_hand = JSON.parse(game_state.state)
+    hand = start_hand.reject { |el| el.name == data["emoji"] }
+    hand.append(game.deal_one)
+    game_state.hand = hand.to_json
+    if game_state.save
+      transmit( {hand: hand} );
+    else
+      puts "game_state trade-in save failure"
+    end
   end
 end
