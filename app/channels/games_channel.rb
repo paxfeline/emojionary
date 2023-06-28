@@ -8,15 +8,18 @@ class GamesChannel < ApplicationCable::Channel
     # broadcast initial message here
     puts "transmitting..."
     
-    transmit( { cmd: "id", id: player_id } )
+    #transmit( { cmd: "id", id: player_id } )
+    setupMsg = { id: player_id };
     
     game = Game.find(params[:game_id])
     player = Player.find(player_id)
     
     if game.judge_id == player.id
-      transmit( { cmd: "judge" } )
+      #transmit( { cmd: "judge" } )
+      setupMsg[:role] = "judge"
     else
-      transmit( { cmd: "artist" } )
+      #transmit( { cmd: "artist" } )
+      setupMsg[:role] = "artist"
     end
 
     #debugger
@@ -38,9 +41,13 @@ class GamesChannel < ApplicationCable::Channel
 
     game_state.save
 
-    transmit( { cmd: "hand", hand: hand } )
+    #transmit( { cmd: "hand", hand: hand } )
+    setupMsg[:hand] = hand;
 
-    transmit( { cmd: "prompt", prompt: game.prompt.prompt })
+    #transmit( { cmd: "prompt", prompt: game.prompt.prompt })
+    setupMsg[:prompt] = game.prompt.prompt
+
+    transmit( setupMsg );
 
     puts "--end transmission--"
   end  
@@ -84,21 +91,30 @@ class GamesChannel < ApplicationCable::Channel
         game.prompt = Prompt.all.sample
         game.judge = judge;
         
+        # use usedprompt
+        up = UsedPrompt.new
+        up.prompt = game.prompt
+        up.game = game
+        up.save
+
+        # prompt
+        game.prompt = Prompt.all.sample
+        
         if judge.save && game.save
           o = game.players.inject([]) do |acc, pl|
-            acc.append({player: pl.id, role: pl.id == judge.id ? "judge" : "artist"})
+            acc.append(
+              {
+                player: pl.id,
+                data:
+                  {
+                    prompt: game.prompt.prompt,
+                    role: pl.id == judge.id ? "judge" : "artist",
+                  }
+              }
+            )
           end
           
-          # use usedprompt
-          up = UsedPrompt.new
-          up.prompt = game.prompt
-          up.game = game
-          up.save
-          
-          # prompt
-          game.prompt = Prompt.all.sample
-          
-          ActionCable.server.broadcast(params[:game_id], { cmd: "new-round", all: o, prompt: game.prompt.prompt });
+          ActionCable.server.broadcast(params[:game_id], { broadcast: o });
         else
           puts "new round fail"
           puts judge.errors.full_messages

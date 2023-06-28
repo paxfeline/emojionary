@@ -226,7 +226,7 @@ body
 <div id="judge">
     <div id="judge-panel">
         <button
-            style="font-size: 72pt;"
+            style="font-size: 16vw;"
             onclick="startCountdown()">
             Start Countdown
         </button>
@@ -350,22 +350,21 @@ var cableFunc =
                     console.log("cable incoming", data);
 
                     // fix up new round command
-                    if (data.cmd == "new-round")
+                    if (data.broadcast)
                     {
-                        data.cmd = data.all.find( el => el.player == gameState.player ).role;
-                        console.log("new round role:", data.cmd);
-                        promptDiv.innerHTML = data.prompt;
+                        data = data.broadcast.find( el => el.player == gameState.player ).data;
+                        console.log("broadcast data:", data);
                     }
 
-                    if (data.cmd == "id")
+                    if (data.id)
                     {
                         gameState.player = data.id;
                     }
-                    else if (data.cmd == "prompt")
+                    if (data.prompt)
                     {
                         promptDiv.innerHTML = data.prompt;
                     }
-                    else if (data.cmd == "hand")
+                    if (data.hand)
                     {
                         handDiv.innerHTML = boardDiv.innerHTML = "";
                         console.log(data.hand);
@@ -394,25 +393,29 @@ var cableFunc =
                                     handDiv.appendChild(emel);
                             });
                     }
-                    else if (data.cmd == "judge")
+                    if (data.role)
                     {
-                        gameState.role = "judge";
-                        gameState.chosen = undefined;
+                        gameState.role = data.role;
 
-                        field.innerHTML = "";
+                        if (data.role == "judge")
+                        {
+                            gameState.chosen = undefined;
 
-                        gameDiv.classList.add("gone")
-                        judgeDiv.classList.remove("gone")
-                        judgePanelDiv.classList.remove("gone");
+                            field.innerHTML = "";
+
+                            gameDiv.classList.add("gone")
+                            judgeDiv.classList.remove("gone")
+                            judgePanelDiv.classList.remove("gone");
+                        }
+                        else if (data.role == "artist")
+                        {
+                            gameDiv.classList.remove("gone");
+                            judgeDiv.classList.add("gone");
+                        }
                     }
-                    else if (data.cmd == "artist")
-                    {
-                        gameState.role = "artist";
 
-                        gameDiv.classList.remove("gone");
-                        judgeDiv.classList.add("gone");
-                    }
-                    else if (data.cmd == "countdown")
+                    // cmds
+                    if (data.cmd == "countdown")
                     {
                         if (document.visibilityState == "hidden") return;
 
