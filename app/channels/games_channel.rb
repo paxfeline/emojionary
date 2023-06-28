@@ -154,9 +154,9 @@ class GamesChannel < ApplicationCable::Channel
     game = Game.find(params[:game_id])
     game_state = GameState.find_by({player_id: player_id, game_id: game.id})
     start_hand = JSON.parse(game_state.state)
-    hand = start_hand.reject { |el| el.name == data["emoji"] }
+    hand = start_hand.reject { |el| el["name"] == data["emoji"] }
     hand.append(game.deal_one)
-    game_state.hand = hand.to_json
+    game_state.state = hand.to_json
     if game_state.save
       transmit( {hand: hand} );
     else

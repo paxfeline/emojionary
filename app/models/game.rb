@@ -18,7 +18,7 @@ class Game < ApplicationRecord
         ind = rand(cat["all"].size)
         #puts cat["all"][ind]
         r = cat["all"][ind]
-        cat["all"].delete(ind)
+        cat["all"].delete_at(ind)
 
         if deck.nil?
             self.deck = deck
