@@ -10,6 +10,7 @@ class AddGamesTable < ActiveRecord::Migration[7.0]
       t.string :title
       t.references :judge, null: false, index: true, foreign_key: {to_table: :players}, type: :uuid
       t.string :deck
+      t.boolean :judging
 
       t.timestamps
     end

@@ -58,7 +58,7 @@ private
         # emojis
 
         # Emoji.all.group_by(&:category).map { |k,v| { category: k, all: v.map { |e| { raw: e.raw, name: e.name, ios: e.ios_version } } } }
-        deck =
+        deck ||=
             Emoji.all.group_by(&:category).map do |k,v|
                 {
                     category: k,
@@ -74,10 +74,12 @@ private
 
         #debugger
 
-        self.deck = deck.to_json
+        self.deck ||= deck.to_json
 
         # prompt
-        self.prompt = Prompt.all.sample
+        self.prompt ||= Prompt.all.sample
+
+        self.judging ||= false
         
         #up = UsedPrompt.new
         #up.prompt = self.prompt

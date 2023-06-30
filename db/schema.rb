@@ -19,6 +19,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_11_051730) do
     t.uuid "player_id", null: false
     t.uuid "game_id", null: false
     t.string "state"
+    t.boolean "ready"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["game_id"], name: "index_game_states_on_game_id"
@@ -29,6 +30,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_11_051730) do
     t.string "title"
     t.uuid "judge_id", null: false
     t.string "deck"
+    t.boolean "judging"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "prompt_id"

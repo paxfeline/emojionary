@@ -21,12 +21,12 @@ class GamesChannel < ApplicationCable::Channel
       #transmit( { cmd: "artist" } )
       setupMsg[:role] = "artist"
     end
-
+    
     #debugger
-
+    
     #game_state = GameState.find_by(player_id: player_id)
     game_state = GameState.find_by({player_id: player_id, game_id: game.id})
-
+    
     if game_state.nil?
       game_state = GameState.new
       game_state.game = game
@@ -36,21 +36,40 @@ class GamesChannel < ApplicationCable::Channel
     else
       hand = game_state.state
     end
-
+    
     #puts hand.inspect
-
+    
     game_state.save
-
+    
     #transmit( { cmd: "hand", hand: hand } )
     setupMsg[:hand] = JSON.parse(hand);
-
+    
     #transmit( { cmd: "prompt", prompt: game.prompt.prompt })
     setupMsg[:prompt] = game.prompt.prompt
+    
+    setupMsg[:judging] = game.judging
+
+    #debugger
+
+    setupMsg[:players] = getPlayers game
 
     transmit( setupMsg );
 
     puts "--end transmission--"
-  end  
+  end
+
+  def getPlayers(game)
+    game ||= Game.find(params[:game_id])
+    players = game.game_states.inject([]) do |acc, gs|
+      acc.append({player: gs.player.id, ready: gs.ready})
+      acc
+    end
+    players
+  end
+
+  def broadcastPlayers
+    ActionCable.server.broadcast(params[:game_id], { players: getPlayers });
+  end
 
   def unsubscribed
     stop_all_streams
