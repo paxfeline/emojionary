@@ -21,7 +21,7 @@ class Game < ApplicationRecord
         cat["all"].delete_at(ind)
 
         if deck.nil?
-            self.deck = deck
+            self.deck = deck.to_json
             self.save
         end
 
@@ -42,7 +42,7 @@ class Game < ApplicationRecord
             hand.append em
         end
 
-        self.deck = deck
+        self.deck = deck.to_json
 
         self.save
 

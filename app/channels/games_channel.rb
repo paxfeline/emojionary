@@ -39,7 +39,9 @@ class GamesChannel < ApplicationCable::Channel
     
     #puts hand.inspect
     
-    game_state.save
+    if !game_state.save
+      puts game_state.errors.full_messages
+    end
     
     #transmit( { cmd: "hand", hand: hand } )
     setupMsg[:hand] = JSON.parse(hand);
