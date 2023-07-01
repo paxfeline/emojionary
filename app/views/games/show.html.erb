@@ -5,7 +5,7 @@
 *
 {
     box-sizing: border-box;
-    touch-action: none;
+    /*touch-action: none;*/
 }
 
 @media (orientation: portrait)
@@ -23,6 +23,7 @@ body
     margin: 0;
     overflow: hidden;
     height: 100vh;
+    
     user-select: none;
     -webkit-user-select: none; /* Safari */
 
@@ -196,6 +197,15 @@ body
     height: 100%;
 
     font-size: 10vmin;
+
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+
+#menu-spacer
+{
+    flex-grow: 1;
 }
 
 #menu-emoji
@@ -204,16 +214,17 @@ body
     text-align: center;
 }
 
-#menu > div:hover
+#menu > div > div:hover
 {
     background-color: lightblue;
 }
 
 #close-menu
 {
+    /*
     position: absolute;
     bottom: 0;
-    width: calc(100% - 0.6em); /* minus padding */
+    width: calc(100% - 0.6em); */ /* minus padding */
 }
 
 .selected
@@ -257,12 +268,23 @@ body
 <div id="menu-btn" onclick="showMenu(event);">☰</div>
 
 <div id="menu" class="gone">
-<div id="menu-emoji"></div>
-<div id="change-scale" onclick="scaleEmoji();">Scale Emoji</div>
-<div id="change-scale" onclick="flipEmoji('X');">Flip Horizontal</div>
-<div id="change-scale" onclick="flipEmoji('Y');">Flip Vertical</div>
-<div id="trade-in" onclick="tradeIn();">Trade In Emoji</div>
-<div id="close-menu" onclick="closeMenu();">Close</div>
+    <div id="menu-emoji-section">
+        <div id="menu-emoji"></div>
+        <div id="change-scale" onclick="scaleEmoji();">Scale Emoji</div>
+        <div id="change-scale" onclick="flipEmoji('X');">Flip Horizontal</div>
+        <div id="change-scale" onclick="flipEmoji('Y');">Flip Vertical</div>
+        <div id="trade-in" onclick="tradeIn();">Trade In Emoji</div>
+        <hr>
+    </div>
+    <div id="menu-game-section">
+        <div id="trade-in" onclick=";">Set Name</div>
+        <div id="trade-in" onclick=";">Exit Game</div>
+        <hr>
+    </div>
+    <div id="menu-spacer"></div>
+    <div id="menu-close-section">
+        <div id="close-menu" onclick="closeMenu();">Close</div>
+    </div>
 </div>
 
 <div id="countdown"></div>
