@@ -318,6 +318,7 @@ var fieldDiv = document.querySelector("#field");
 var countdownDiv = document.querySelector("#countdown");
 var menuDiv = document.querySelector("#menu");
 var menuEmojiDiv = document.querySelector("#menu-emoji");
+var menuEmojiSectionDiv = document.querySelector("#menu-emoji-section");
 var promptDiv = document.querySelector("#prompt");
 
 window.App = window.App || {}
@@ -330,9 +331,16 @@ function startCountdown()
 
 function showMenu(e)
 {
-    menuEmojiDiv.innerHTML = `${gameState.selectedEmoji.innerHTML} <span id="menu-emoji-title"> - ${gameState.selectedEmoji.title}</span>`;
+    if (gameState.selectedEmoji)
+    {
+        menuEmojiSectionDiv.classList.remove("gone");
+        menuEmojiDiv.innerHTML = `${gameState.selectedEmoji.innerHTML} <span id="menu-emoji-title"> - ${gameState.selectedEmoji.title}</span>`;
+    }
+    else
+        menuEmojiSectionDiv.classList.add("gone");
 
     menuDiv.classList.remove("gone");
+    menuDiv.scrollTo(0, 0);
 
     gameState.menuOpen = true;
 
