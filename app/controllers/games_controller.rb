@@ -34,7 +34,7 @@ class GamesController < ApplicationController
     # subs is a hash where the keys are json identifiers and the values are Channels
     subs = conn&.subscriptions.instance_variable_get("@subscriptions")
     
-    chan = subs&.first {|k,v| v.class == "GamesChannel"}[1]
+    chan = subs&.first {|k,v| v.class == "GamesChannel"}&.[](1)
     
     #debugger
 
