@@ -170,6 +170,18 @@ body
     }
 }
 
+#menu-btn
+{
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin: 0.3em;
+    border-radius: 1em;
+    padding: 0.25em;
+    background-color: lightblue;
+    font-size: 7vmin;
+}
+
 #menu
 {
     position: absolute;
@@ -242,6 +254,8 @@ body
     <div id="field"></div>
 </div>
 
+<div id="menu-btn" onclick="showMenu(event);">☰</div>
+
 <div id="menu" class="gone">
 <div id="menu-emoji"></div>
 <div id="change-scale" onclick="scaleEmoji();">Scale Emoji</div>
@@ -286,6 +300,17 @@ function startCountdown()
     App.subc.perform("start_countdown");
 }
 
+function showMenu(e)
+{
+    menuEmojiDiv.innerHTML = gameState.selectedEmoji.innerHTML;
+
+    menuDiv.classList.remove("gone");
+
+    gameState.menuOpen = true;
+
+    gameState.menuTimer = null;
+}
+
 function closeMenu()
 {
     menuDiv.classList.add("gone");
@@ -294,7 +319,7 @@ function closeMenu()
 
 function scaleEmoji()
 {
-    emel = gameState.pointerTarget;
+    emel = gameState.selectedEmoji;
 
     let s = prompt("Enter scale factor as a decimal, (e.g. 0.75):");
     if (!s) return;
@@ -312,7 +337,7 @@ function scaleEmoji()
 
 function flipEmoji(axis)
 {
-    emel = gameState.pointerTarget;
+    emel = gameState.selectedEmoji;
 
     let csf = emel.style.getPropertyValue(`--flip${axis}`) || 1;
     emel.style.setProperty(`--flip${axis}`, -csf);
@@ -328,7 +353,7 @@ function flipEmoji(axis)
 
 function tradeIn()
 {
-    emel = gameState.pointerTarget;
+    emel = gameState.selectedEmoji;
 
     App.subc.perform("trade_in", { emoji: emel.title });
 
@@ -519,37 +544,27 @@ game.addEventListener("pointerdown",
 
         gameState.start = {x: e.pageX, y: e.pageY};
 
-        gameState.clickCache = e.target;
         gameState.clickTime = Date.now();
         gameState.distance = 0;
 
-        if (e.target.dataset.role != "dragitem") return;
+        //if (e.target.dataset.role != "dragitem") return;
 
         // will likely be overwritten by pm wiggle
-        gameState.pointerTarget = e.target;
-
-        if (e.target.parentNode.id == "board")
+        if (e.target != gameState.selectedEmoji)
         {
-            gameState.menuTimer = setTimeout(
-                () =>
-                {
-                    if (gameState.distance < 20)
-                    {
-                        // stop dragging
-                        gameState.clickCache = null;
-
-                        menuEmojiDiv.innerHTML = e.target.innerHTML;
-
-                        menuDiv.classList.remove("gone");
-
-                        gameState.menuOpen = true;
-
-                        gameState.menuTimer = null;
-                    }
-                },
-                1000 // one sec
-            );
+            if (gameState.selectedEmoji)
+                gameState.selectedEmoji.classList.remove("selected")
+            
+            if (e.target.dataset.role == "dragitem")
+            {
+                gameState.selectedEmoji =  e.target;
+                gameState.selectedEmoji.classList.add("selected");
+            }
+            else
+                gameState.selectedEmoji =  null;
         }
+
+        gameState.clickCache = gameState.selectedEmoji;
     }
 );
 
@@ -559,19 +574,19 @@ game.addEventListener("pointermove",
         //console.log("pm", gameState.dragging);
         
         // delay this until drag actually starts
-        // clickCache comes from pointerdown
+        // selectedEmoji comes from pointerdown
         // will be equal to e.target
         if (gameState.clickCache && !gameState.dragging)
         {
             // start drag
-            var role = gameState.clickCache.dataset.role;
+            var role = gameState.selectedEmoji.dataset.role;
 
             if (role == "dragitem")
             {
                 gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
                 game.setPointerCapture(e.pointerId);
                 gameState.dragging = e.target.cloneNode(true);
-                gameState.pointerTarget = gameState.dragging;
+                gameState.selectedEmoji = gameState.dragging;
                 gameState.dragOrig = e.target;
                 e.target.parentNode.appendChild(gameState.dragging);
                 e.target.classList.add("vis-hid");

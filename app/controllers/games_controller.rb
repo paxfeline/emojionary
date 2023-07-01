@@ -23,9 +23,24 @@ class GamesController < ApplicationController
 
         #puts @user.inspect
       else
-        render :index, status: :unprocessable_entity
+        render :index, status: :unprocessable_entity and return
       end
     end
+
+    #debugger
+
+    conn = ActionCable.server.connections.first { |c| c.player_id == @user.id }
+    
+    # subs is a hash where the keys are json identifiers and the values are Channels
+    subs = conn.subscriptions.instance_variable_get("@subscriptions")
+    
+    chan = subs.first {|k,v| v.class == "GamesChannel"}[1]
+    
+    #debugger
+
+    #puts chan.getPlayers
+
+    ActionCable.server.broadcast(params[:game_id], { players: chan.getPlayers });
   end
 
   def create

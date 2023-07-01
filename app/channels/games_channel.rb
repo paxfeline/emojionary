@@ -24,7 +24,6 @@ class GamesChannel < ApplicationCable::Channel
     
     #debugger
     
-    #game_state = GameState.find_by(player_id: player_id)
     game_state = GameState.find_by({player_id: player_id, game_id: game.id})
     
     if game_state.nil?
@@ -51,8 +50,6 @@ class GamesChannel < ApplicationCable::Channel
     
     setupMsg[:judging] = game.judging
 
-    #debugger
-
     setupMsg[:players] = getPlayers game
 
     transmit( setupMsg );
@@ -60,7 +57,7 @@ class GamesChannel < ApplicationCable::Channel
     puts "--end transmission--"
   end
 
-  def getPlayers(game)
+  def getPlayers(game = nil)
     game ||= Game.find(params[:game_id])
     players = game.game_states.inject([]) do |acc, gs|
       acc.append({player: gs.player.id, ready: gs.ready})
