@@ -211,7 +211,13 @@ body
 #menu-emoji
 {
     font-size: 15vmin;
-    text-align: center;
+    /*text-align: center;*/
+}
+
+#menu-emoji-title
+{
+    font-size: 66.6%;
+    font-style: italic;
 }
 
 #menu > div > div:hover
@@ -324,7 +330,7 @@ function startCountdown()
 
 function showMenu(e)
 {
-    menuEmojiDiv.innerHTML = gameState.selectedEmoji.innerHTML;
+    menuEmojiDiv.innerHTML = `${gameState.selectedEmoji.innerHTML} <span id="menu-emoji-title"> - ${gameState.selectedEmoji.title}</span>`;
 
     menuDiv.classList.remove("gone");
 
