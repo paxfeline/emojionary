@@ -39,7 +39,7 @@ class GamesController < ApplicationController
     #debugger
 
     #puts chan.getPlayers
-    if (chan.exists?)
+    if (chan.present?)
       ActionCable.server.broadcast(params[:game_id], { players: chan.getPlayers });
     end
   end
