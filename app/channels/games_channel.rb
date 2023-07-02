@@ -65,7 +65,8 @@ class GamesChannel < ApplicationCable::Channel
       acc.append({player: gs.player.id, ready: gs.ready})
       acc
     end
-    players
+    #debugger
+    players.select { |j| j["player_id"] != game.judge_id }
   end
 
   def broadcastPlayers
