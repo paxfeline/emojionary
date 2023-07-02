@@ -1,7 +1,7 @@
 class GamesChannel < ApplicationCable::Channel
   def subscribed
-    #game = Game.find(params[:game_id])
-    stream_from params[:game_id]
+    #game = Game.find(game_id)
+    stream_from game_id
   end
 
   def after_confirmation_sent
@@ -11,7 +11,7 @@ class GamesChannel < ApplicationCable::Channel
     #transmit( { cmd: "id", id: player_id } )
     setupMsg = { id: player_id };
     
-    game = Game.find(params[:game_id])
+    game = Game.find(game_id)
     player = Player.find(player_id)
     
     if game.judge_id == player.id
@@ -58,7 +58,7 @@ class GamesChannel < ApplicationCable::Channel
   end
 
   def getPlayers(game = nil)
-    game ||= Game.find(params[:game_id])
+    game ||= Game.find(game_id)
     players = game.game_states.inject([]) do |acc, gs|
       acc.append({player: gs.player.id, ready: gs.ready})
       acc
@@ -67,7 +67,7 @@ class GamesChannel < ApplicationCable::Channel
   end
 
   def broadcastPlayers
-    ActionCable.server.broadcast(params[:game_id], { players: getPlayers });
+    ActionCable.server.broadcast(game_id, { players: getPlayers });
   end
 
   def unsubscribed
@@ -75,30 +75,30 @@ class GamesChannel < ApplicationCable::Channel
   end
 
   def start_countdown
-    game = Game.find(params[:game_id])
+    game = Game.find(game_id)
     game.players.index_by(&:id) 
     Thread.new do
       Rails.application.executor.wrap do
         # your code here
         15.step(5, -5) do |i|
-          ActionCable.server.broadcast(params[:game_id], { cmd: "countdown", time: i });
+          ActionCable.server.broadcast(game_id, { cmd: "countdown", time: i });
           sleep 5
         end
-        ActionCable.server.broadcast(params[:game_id], { cmd: "countdown", time: 0 });
+        ActionCable.server.broadcast(game_id, { cmd: "countdown", time: 0 });
         o = game.game_states.all.select { |j| j.player_id != game.judge_id }
           .inject([]) do |acc, gs|
             t = JSON.parse(gs.state).select { |el| el["position"].present? }
             acc.append({player: gs.player_id, art: t})
             acc
           end
-        ActionCable.server.broadcast(params[:game_id], { cmd: "show-em", all: o });
+        ActionCable.server.broadcast(game_id, { cmd: "show-em", all: o });
       end
     end
   end
 
   def pick(data)
-    game = Game.find(params[:game_id])
-    ActionCable.server.broadcast(params[:game_id], { cmd: "pick", player: data["player"] });
+    game = Game.find(game_id)
+    ActionCable.server.broadcast(game_id, { cmd: "pick", player: data["player"] });
 
     Thread.new do
       Rails.application.executor.wrap do
@@ -143,7 +143,7 @@ class GamesChannel < ApplicationCable::Channel
             end
           end
           
-          ActionCable.server.broadcast(params[:game_id], { broadcast: o });
+          ActionCable.server.broadcast(game_id, { broadcast: o });
         else
           puts "new round fail"
           puts judge.errors.full_messages
@@ -163,13 +163,13 @@ class GamesChannel < ApplicationCable::Channel
     
     #debugger
 
-    game_state = GameState.find_by({player_id: player_id, game_id: params[:game_id]})
+    game_state = GameState.find_by({player_id: player_id, game_id: game_id})
     game_state.state = data["hand"].to_json
     game_state.save
   end
 
   def trade_in(data)
-    game = Game.find(params[:game_id])
+    game = Game.find(game_id)
     game_state = GameState.find_by({player_id: player_id, game_id: game.id})
     start_hand = JSON.parse(game_state.state)
     hand = start_hand.reject { |el| el["name"] == data["emoji"] }
@@ -180,5 +180,15 @@ class GamesChannel < ApplicationCable::Channel
     else
       puts "game_state trade-in save failure"
     end
+  end
+
+  def exit_game()
+    game_state = GameState.find_by({player_id: player_id, game_id: game_id})
+    game_state.destroy
+
+    broadcastPlayers
+
+    #debugger
+    ActionCable.server.remote_connections.where(player_id: player_id, game_id: game_id).disconnect
   end
 end

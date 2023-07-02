@@ -4,7 +4,10 @@
 import { createConsumer } from "@rails/actioncable"
 
 window.App = window.App || {}
-App.cableConsumer = createConsumer();
+
+App.createConsumer = createConsumer;
+
+//debugger;
 
 // check for callback
 if (App.cableConsumerCallback)

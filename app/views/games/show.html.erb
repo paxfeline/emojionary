@@ -283,8 +283,10 @@ body
         <hr>
     </div>
     <div id="menu-game-section">
-        <div id="trade-in" onclick=";">Set Name</div>
-        <div id="trade-in" onclick=";">Exit Game</div>
+        <!-- TODO:
+        <div id="" onclick=";">Set Name</div>
+        -->
+        <div id="exit-game" onclick="exitGame();">Exit Game</div>
         <hr>
     </div>
     <div id="menu-spacer"></div>
@@ -325,7 +327,6 @@ window.App = window.App || {}
 
 function startCountdown()
 {
-
     App.subc.perform("start_countdown");
 }
 
@@ -396,15 +397,24 @@ function tradeIn()
     closeMenu();
 }
 
+function exitGame()
+{
+    App.subc.perform("exit_game");
+}
+
 var cableFunc =
     () =>
     {
         // if consumer isn't loaded, set callback to this function and exit
-        if (!App.cableConsumer)
+        if (!App.createConsumer)
         {
             App.cableConsumerCallback = cableFunc;
             return;
         }
+
+        let createConsumer = App.createConsumer;
+        
+        App.cableConsumer = createConsumer(`/cable${document.location.search}`);
 
         // App.cableConsumer comes from consumer.js
         App.subc = App.cableConsumer.subscriptions.create(
