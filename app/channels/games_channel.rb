@@ -24,7 +24,7 @@ class GamesChannel < ApplicationCable::Channel
     
     #debugger
     
-    game_state = GameState.find_by({player_id: player_id, game_id: game_id})
+    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
     
     if game_state.nil?
       game_state = GameState.new
@@ -72,7 +72,7 @@ class GamesChannel < ApplicationCable::Channel
     game ||= Game.find(game_id)
     players = game.game_states.inject([]) do |acc, gs|
       if gs.player_id != game.judge_id
-        acc.append({player: gs.player.id, ready: gs.ready})
+        acc.append({player: gs.player_id, ready: gs.ready})
       end
       acc
     end
@@ -134,7 +134,7 @@ class GamesChannel < ApplicationCable::Channel
         
         if judge.save && game.save
           o = game.players.inject([]) do |acc, pl|
-            game_state = GameState.find_by({player_id: pl.id, game_id: game.id})
+            game_state = GameState.find_by(player_id: pl.id, game_id: game.id)
             start_hand = JSON.parse(game_state.state)
             nec = start_hand.select { |el| el["position"].present? }.count
             hand = start_hand.select { |el| el["position"].nil? }
@@ -177,14 +177,14 @@ class GamesChannel < ApplicationCable::Channel
     
     #debugger
 
-    game_state = GameState.find_by({player_id: player_id, game_id: game_id})
+    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
     game_state.state = data["hand"].to_json
     game_state.save
   end
 
   def trade_in(data)
     game = Game.find(game_id)
-    game_state = GameState.find_by({player_id: player_id, game_id: game.id})
+    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
     start_hand = JSON.parse(game_state.state)
     hand = start_hand.reject { |el| el["name"] == data["emoji"] }
     hand.append(game.deal_one)
@@ -196,8 +196,18 @@ class GamesChannel < ApplicationCable::Channel
     end
   end
 
-  def exit_game()
-    game_state = GameState.find_by({player_id: player_id, game_id: game_id})
+  def set_ready
+    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
+    game_state.ready = true
+    if game_state.save
+      broadcastPlayers
+    else
+      puts "set ready gs save error"
+    end
+  end
+
+  def exit_game
+    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
     game_state.destroy
 
     broadcastPlayers

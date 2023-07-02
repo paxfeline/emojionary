@@ -287,6 +287,8 @@ body
         <!-- TODO:
         <div id="" onclick=";">Set Name</div>
         -->
+        <div id="exit-game" onclick="setReady();">Ready for Judging</div>
+        <hr>
         <div id="exit-game" onclick="exitGame();">Exit Game</div>
         <hr>
     </div>
@@ -395,6 +397,13 @@ function tradeIn()
     emel = gameState.selectedEmoji;
 
     App.subc.perform("trade_in", { emoji: emel.title });
+
+    closeMenu();
+}
+
+function setReady()
+{
+    App.subc.perform("set_ready");
 
     closeMenu();
 }

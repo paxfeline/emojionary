@@ -6,6 +6,6 @@ class GameState < ApplicationRecord
 
   private
   def game_state_setup
-    self.ready = false
+    self.ready ||= false
   end
 end
