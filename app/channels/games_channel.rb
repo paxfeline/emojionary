@@ -24,7 +24,7 @@ class GamesChannel < ApplicationCable::Channel
     
     #debugger
     
-    game_state = GameState.find_by({player_id: player_id, game_id: game.id})
+    game_state = GameState.find_by({player_id: player_id, game_id: game_id})
     
     if game_state.nil?
       game_state = GameState.new
