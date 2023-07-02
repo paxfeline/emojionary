@@ -140,6 +140,7 @@ class GamesChannel < ApplicationCable::Channel
             hand = start_hand.select { |el| el["position"].nil? }
             nec.times { hand.append(game.deal_one) }
             game_state.state = hand.to_json
+            game_state.ready = false
             if game_state.save
               acc.append(
                 {
