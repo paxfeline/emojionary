@@ -50,10 +50,19 @@ class GamesChannel < ApplicationCable::Channel
     
     setupMsg[:judging] = game.judging
 
-    setupMsg[:players] = getPlayers game
+    #setupMsg[:players] = getPlayers game
 
     transmit( setupMsg );
 
+    # whyyyyyy... is this necessary? 
+    Thread.new do
+      Rails.application.executor.wrap do
+        #debugger
+        broadcastPlayers
+        puts "--players broadcast--"
+      end
+    end
+    
     puts "--end transmission--"
   end
 
@@ -62,11 +71,13 @@ class GamesChannel < ApplicationCable::Channel
     return nil if game_id.nil?
     game ||= Game.find(game_id)
     players = game.game_states.inject([]) do |acc, gs|
-      acc.append({player: gs.player.id, ready: gs.ready})
+      if gs.player_id != game.judge_id
+        acc.append({player: gs.player.id, ready: gs.ready})
+      end
       acc
     end
     #debugger
-    players.select { |j| j["player_id"] != game.judge_id }
+    players
   end
 
   def broadcastPlayers
