@@ -58,6 +58,8 @@ class GamesChannel < ApplicationCable::Channel
   end
 
   def getPlayers(game = nil)
+    # not sure why it's connecting before this is there...
+    return nil if game_id.nil?
     game ||= Game.find(game_id)
     players = game.game_states.inject([]) do |acc, gs|
       acc.append({player: gs.player.id, ready: gs.ready})
