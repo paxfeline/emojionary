@@ -29,7 +29,7 @@ class GamesController < ApplicationController
 
     #debugger
 
-    conn = ActionCable.server.connections.first { |c| c.player_id == @user.id }
+    #conn = ActionCable.server.connections.first { |c| c.player_id == @user.id }
     
     # subs is a hash where the keys are json identifiers and the values are Channels
     #subs = conn&.subscriptions.instance_variable_get("@subscriptions")
