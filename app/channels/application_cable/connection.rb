@@ -12,28 +12,17 @@ module ApplicationCable
       #self.game_id = request.params[:game_id]
     end
 
-    def disconnect
+    #def disconnect
+      # don't destroy game state right away...
+      # after a delay in case they reconnect?
+
       #debugger
 
-      game_state = GameState.find_by(player_id: self.player_id, game_id: self.game_id)
-      game_state&.destroy
-
-      #conn = ActionCable.server.connections.first { |c| c.player_id == @user.id }
-    
-      # subs is a hash where the keys are json identifiers and the values are Channels
-      #subs = conn&.subscriptions.instance_variable_get("@subscriptions")
-      
-      #chan = subs&.first {|k,v| v.class == "GamesChannel"}&.[](1)
-      
-      #debugger
-
-      #puts chan.getPlayers
-      #if (params[:game_id].present? && chan.present?)
-      #  ActionCable.server.broadcast(params[:game_id], { players: chan.getPlayers });
-      #end
+      #game_state = GameState.find_by(player_id: self.player_id, game_id: self.game_id)
+      #game_state&.destroy
   
-      broadcastPlayers
-    end
+      #broadcastPlayers
+    #end
 
     # fucking dup code
     def getPlayers
