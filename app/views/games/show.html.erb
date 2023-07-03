@@ -225,6 +225,13 @@ body
     background-color: lightblue;
 }
 
+#game-name
+{
+    font-size: 0.666em;
+    font-style: italic;
+    text-align: center;
+}
+
 #close-menu
 {
     /*
@@ -300,7 +307,7 @@ body
 
 <div id="menu" class="gone">
     <div id="menu-top">
-        <%= "<div>#{@game.title}</div>" if @game.title.present? %>
+        <%= ("<div id=\"game-name\">#{sanitize  @game.title}</div>".html_safe) if @game.title.present? %>
         <div id="menu-emoji-section" class="menu-section">
             <div id="menu-emoji"></div>
             <div onclick="scaleEmoji();">Scale Emoji</div>
