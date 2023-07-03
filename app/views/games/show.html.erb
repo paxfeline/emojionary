@@ -365,7 +365,10 @@ function setName()
 {
     let name = prompt("Enter your name")
     if (name)
+    {
         App.subc.perform("set_name", { name });
+        closeMenu();
+    }
 }
 
 function startCountdown()
@@ -454,8 +457,11 @@ function setReady()
 
 function exitGame()
 {
-    App.subc.perform("exit_game");
-    location = "/";
+    if (confirm("Leave game?"))
+    {
+        App.subc.perform("exit_game");
+        location = "/";
+    }
 }
 
 var cableFunc =
@@ -512,7 +518,8 @@ var cableFunc =
                     {
                         let ready = data.players.reduce( (acc, el) => (acc += el.ready ? 1 : 0, acc), 0 );
                         let total = data.players.length;
-                        readyReadoutDiv.innerHTML = `${ready} / ${total}`;
+                        let list = data.players.reduce( (acc, el) => acc + `<br>${el.name ? el.name : "Unnamed"}: ${el.ready ? 'ready' : 'not ready'}`, '');
+                        readyReadoutDiv.innerHTML = `${ready} / ${total}${list}`;
                     }
                     if (data.hand)
                     {
