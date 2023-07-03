@@ -247,11 +247,21 @@ body
     background-color: pink;
 }
 
-</style>
+.gallery-art
+{
+    overflow: hidden;
+}
 
-<div style="position: absolute; bottom: 0; right: 0; background-color: rgba(255, 255, 255, 0.8);">
-    <%= @game.title %>
-</div>
+.artist-signature
+{
+    position: absolute;
+    top: 0.25em;
+    left: 0.25em;
+    font-style: italic;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+</style>
 
 <div style="position: absolute; bottom: 0; left: 0; background-color: rgba(255, 255, 255, 0.8); z-index: 15;">
 <h2>emoji <span id="prompt"></span></h2>
@@ -290,20 +300,19 @@ body
 
 <div id="menu" class="gone">
     <div id="menu-top">
+        <%= "<div>#{@game.title}</div>" if @game.title.present? %>
         <div id="menu-emoji-section" class="menu-section">
             <div id="menu-emoji"></div>
-            <div id="change-scale" onclick="scaleEmoji();">Scale Emoji</div>
-            <div id="change-scale" onclick="flipEmoji('X');">Flip Horizontal</div>
-            <div id="change-scale" onclick="flipEmoji('Y');">Flip Vertical</div>
-            <div id="trade-in" onclick="tradeIn();">Trade In Emoji</div>
+            <div onclick="scaleEmoji();">Scale Emoji</div>
+            <div onclick="flipEmoji('X');">Flip Horizontal</div>
+            <div onclick="flipEmoji('Y');">Flip Vertical</div>
+            <div onclick="tradeIn();">Trade In Emoji</div>
             <hr>
         </div>
         <div id="menu-game-section" class="menu-section">
-            <!-- TODO:
-            <div id="" onclick=";">Set Name</div>
-            -->
-            <div id="exit-game" onclick="setReady();">Ready for Judging</div>
-            <div id="exit-game" onclick="exitGame();">Exit Game</div>
+            <div onclick="setName();">Set Name</div>
+            <div onclick="setReady();">Ready for Judging</div>
+            <div onclick="exitGame();">Exit Game</div>
         </div>
     </div>
     <div id="menu-close-section" class="menu-section">
@@ -344,6 +353,13 @@ var menuEmojiSectionDiv = document.querySelector("#menu-emoji-section");
 var promptDiv = document.querySelector("#prompt");
 
 window.App = window.App || {}
+
+function setName()
+{
+    let name = prompt("Enter your name")
+    if (name)
+        App.subc.perform("set_name", { name });
+}
 
 function startCountdown()
 {
@@ -568,6 +584,7 @@ var cableFunc =
                             player =>
                             {
                                 let d = document.createElement("div");
+                                d.classList.add("gallery-art");
                                 player.art.forEach(
                                     emoji =>
                                     {
@@ -585,6 +602,14 @@ var cableFunc =
 
                                         //emel.dataset.player = player.id;
                                     });
+
+                                if (player.name)
+                                {
+                                    let nd = document.createElement("div");
+                                    nd.innerHTML = player.name;
+                                    nd.classList.add("artist-signature");
+                                    d.appendChild(nd);
+                                }
 
                                 //let setDoubleTimeout = func => setTimeout( () => setTimeout( func, 0 ), 0 );
 

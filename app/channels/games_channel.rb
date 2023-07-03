@@ -72,7 +72,7 @@ class GamesChannel < ApplicationCable::Channel
     game ||= Game.find(game_id)
     players = game.game_states.inject([]) do |acc, gs|
       if gs.player_id != game.judge_id
-        acc.append({player: gs.player_id, ready: gs.ready})
+        acc.append({player: gs.player_id, ready: gs.ready, name: gs.player.name})
       end
       acc
     end
@@ -102,7 +102,7 @@ class GamesChannel < ApplicationCable::Channel
         o = game.game_states.all.select { |j| j.player_id != game.judge_id }
           .inject([]) do |acc, gs|
             t = JSON.parse(gs.state).select { |el| el["position"].present? }
-            acc.append({player: gs.player_id, art: t})
+            acc.append({player: gs.player_id, art: t, name: gs.player.name})
             acc
           end
         ActionCable.server.broadcast(game_id, { cmd: "show-em", all: o });
@@ -208,6 +208,16 @@ class GamesChannel < ApplicationCable::Channel
       ActionCable.server.broadcast(game_id, { prompt: game.prompt.prompt });
     else
       puts "new prompt failure"
+    end
+  end
+
+  def set_name(data)
+    player = Player.find(player_id)
+    player.name = data["name"]
+    if player.save
+      broadcastPlayers
+    else
+      puts "set name failure"
     end
   end
 
