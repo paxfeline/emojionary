@@ -66,7 +66,7 @@ private
                         # filtering out ios >= 15 'cause I can't see 'em on this laptop
                         v.filter {|u| u.ios_version.split(".")[0].to_i < 15}.map do |e|
                             {
-                                "raw" => e.raw, "name" => e.name, "ios" => e.ios_version, "position" => nil
+                                "raw" => e.raw, "name" => e.name, "ios" => e.ios_version, "position" => nil, "path" => e.image_filename
                             }
                         end
                 }
