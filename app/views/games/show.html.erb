@@ -200,12 +200,12 @@ body
 
     display: flex;
     flex-direction: column;
-    overflow: auto;
 }
 
-#menu-spacer
+#menu-top
 {
     flex-grow: 1;
+    overflow: auto;
 }
 
 #menu-emoji
@@ -220,7 +220,7 @@ body
     font-style: italic;
 }
 
-#menu > div > div:hover
+.menu-section > div:hover
 {
     background-color: lightblue;
 }
@@ -239,6 +239,12 @@ body
             drop-shadow(1px -1px 0 red)
             drop-shadow(-1px 1px 0 red)
             drop-shadow(1px 1px 0 red);
+}
+
+.selectedArt
+{
+    outline: 5px solid red;
+    background-color: pink;
 }
 
 </style>
@@ -274,31 +280,34 @@ body
         </button>
     </div>
     <div id="ready-readout"></div>
-    <div id="field"></div>
+    <div id="fieldCont">
+        <h2 id="judge-text">Click on an artwork to select it</h2>
+        <div id="field"></div>
+    </div>
 </div>
 
 <div id="menu-btn" onclick="showMenu(event);">☰</div>
 
 <div id="menu" class="gone">
-    <div id="menu-emoji-section">
-        <div id="menu-emoji"></div>
-        <div id="change-scale" onclick="scaleEmoji();">Scale Emoji</div>
-        <div id="change-scale" onclick="flipEmoji('X');">Flip Horizontal</div>
-        <div id="change-scale" onclick="flipEmoji('Y');">Flip Vertical</div>
-        <div id="trade-in" onclick="tradeIn();">Trade In Emoji</div>
-        <hr>
+    <div id="menu-top">
+        <div id="menu-emoji-section" class="menu-section">
+            <div id="menu-emoji"></div>
+            <div id="change-scale" onclick="scaleEmoji();">Scale Emoji</div>
+            <div id="change-scale" onclick="flipEmoji('X');">Flip Horizontal</div>
+            <div id="change-scale" onclick="flipEmoji('Y');">Flip Vertical</div>
+            <div id="trade-in" onclick="tradeIn();">Trade In Emoji</div>
+            <hr>
+        </div>
+        <div id="menu-game-section" class="menu-section">
+            <!-- TODO:
+            <div id="" onclick=";">Set Name</div>
+            -->
+            <div id="exit-game" onclick="setReady();">Ready for Judging</div>
+            <div id="exit-game" onclick="exitGame();">Exit Game</div>
+        </div>
     </div>
-    <div id="menu-game-section">
-        <!-- TODO:
-        <div id="" onclick=";">Set Name</div>
-        -->
-        <div id="exit-game" onclick="setReady();">Ready for Judging</div>
+    <div id="menu-close-section" class="menu-section">
         <hr>
-        <div id="exit-game" onclick="exitGame();">Exit Game</div>
-        <hr>
-    </div>
-    <div id="menu-spacer"></div>
-    <div id="menu-close-section">
         <div id="close-menu" onclick="closeMenu();">Close</div>
     </div>
 </div>
@@ -325,7 +334,9 @@ var boardDiv = document.querySelector("#board");
 var judgeDiv = document.querySelector("#judge");
 var readyReadoutDiv = document.querySelector("#ready-readout");
 var judgePanelDiv = document.querySelector("#judge-panel");
+var fieldContDiv = document.querySelector("#fieldCont");
 var fieldDiv = document.querySelector("#field");
+var judgeTextDiv = document.querySelector("#judge-text");
 var countdownDiv = document.querySelector("#countdown");
 var menuDiv = document.querySelector("#menu");
 var menuEmojiDiv = document.querySelector("#menu-emoji");
@@ -517,17 +528,18 @@ var cableFunc =
                         {
                             gameState.chosen = undefined;
 
-                            field.innerHTML = "";
-
-                            gameDiv.classList.add("gone")
-                            judgeDiv.classList.remove("gone")
+                            gameDiv.classList.add("gone");
+                            judgeDiv.classList.remove("gone");
                             readyReadoutDiv.classList.remove("gone");
                             judgePanelDiv.classList.remove("gone");
+                            fieldContDiv.classList.add("gone");
+                            judgeTextDiv.classList.remove("gone")
                         }
                         else if (data.role == "artist")
                         {
                             gameDiv.classList.remove("gone");
                             judgeDiv.classList.add("gone");
+                            judgeTextDiv.classList.add("gone");
                         }
                     }
 
@@ -548,8 +560,9 @@ var cableFunc =
                         judgeDiv.classList.remove("gone");
                         readyReadoutDiv.classList.add("gone");
                         judgePanelDiv.classList.add("gone");
+                        fieldContDiv.classList.remove("gone");
 
-                        field.innerHTML = "";
+                        fieldDiv.innerHTML = "";
                         gameState.gallery = {}
                         data.all.forEach(
                             player =>
@@ -573,6 +586,8 @@ var cableFunc =
                                         //emel.dataset.player = player.id;
                                     });
 
+                                //let setDoubleTimeout = func => setTimeout( () => setTimeout( func, 0 ), 0 );
+
                                 // allow judge to pick winner
                                 gameState.gallery[player.player] = d;
                                 if (gameState.role == "judge")
@@ -581,19 +596,29 @@ var cableFunc =
                                         e =>
                                         {
                                             if (gameState.chosen) return;
-                                            console.log("pick player", player);
-                                            App.subc.perform("pick", { player: player.player });
-                                            gameState.chosen = player.player;
+
+                                            gameState.gallery[player.player].classList.add("selectedArt");
+
+                                            setTimeout(() =>
+                                            {
+                                                if (confirm("This is the one?"))
+                                                {
+                                                    console.log("pick player", player);
+                                                    App.subc.perform("pick", { player: player.player });
+                                                    gameState.chosen = player.player;
+                                                }
+                                                else
+                                                    gameState.gallery[player.player].classList.remove("selectedArt");
+                                            }, 100);
                                         });
                                 }
-                                field.appendChild(d);
+                                fieldDiv.appendChild(d);
                             }
                         )
                     }
                     else if (data.cmd == "pick")
                     {
-                        gameState.gallery[data.player].style.outline = "5px solid red";
-                        gameState.gallery[data.player].style.backgroundColor = "pink";
+                        gameState.gallery[data.player].classList.add("selectedArt");
                     }
                 }
             }
