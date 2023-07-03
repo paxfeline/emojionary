@@ -20,24 +20,24 @@ module ApplicationCable
       end
     end
 
-    def disconnect
+    #def disconnect
       # don't destroy game state right away...
       # after a delay in case they reconnect?
 
-      self.kill_thread = Thread.new do
-        Rails.application.executor.wrap do
-
-          #debugger
-
-          sleep 30
-
-          game_state = GameState.find_by(player_id: self.player_id, game_id: self.game_id)
-          game_state&.destroy
-      
-          broadcastPlayers
-        end
-      end
-    end
+      #self.kill_thread = Thread.new do
+      #  Rails.application.executor.wrap do
+      #
+      #    #debugger
+      #
+      #    sleep 30
+      #
+      #    game_state = GameState.find_by(player_id: self.player_id, game_id: self.game_id)
+      #    game_state&.destroy
+     # 
+     #     broadcastPlayers
+     #   end
+     # end
+    #end
 
     # fucking dup code
     def getPlayers
