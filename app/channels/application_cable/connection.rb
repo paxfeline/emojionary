@@ -2,6 +2,8 @@ module ApplicationCable
   class Connection < ActionCable::Connection::Base
     identified_by :player_id, :game_id
 
+    attr_accessor :kill_thread
+
     def connect
       #puts "cookies"
       #puts cookies.inspect
@@ -10,19 +12,32 @@ module ApplicationCable
       self.game_id = request.params[:game_id]
       #debugger
       #self.game_id = request.params[:game_id]
+
+      if self.kill_thread.present?
+        self.kill_thread.exit
+        self.kill_thread = nil
+        debugger
+      end
     end
 
-    #def disconnect
+    def disconnect
       # don't destroy game state right away...
       # after a delay in case they reconnect?
 
-      #debugger
+      self.kill_thread = Thread.new do
+        Rails.application.executor.wrap do
 
-      #game_state = GameState.find_by(player_id: self.player_id, game_id: self.game_id)
-      #game_state&.destroy
-  
-      #broadcastPlayers
-    #end
+          #debugger
+
+          sleep 30
+
+          game_state = GameState.find_by(player_id: self.player_id, game_id: self.game_id)
+          game_state&.destroy
+      
+          broadcastPlayers
+        end
+      end
+    end
 
     # fucking dup code
     def getPlayers
