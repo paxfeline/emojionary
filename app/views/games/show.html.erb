@@ -532,13 +532,17 @@ var cableFunc =
                         hand.forEach(
                             emoji =>
                             {
-                                //var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
-                                //emel.innerHTML = emoji.raw;
+
+                                var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
+                                emel.innerHTML = emoji.raw;
+
+                                /*
                                 let emel = document.createElement("img");
                                 emel.src = emoji.path;
                                 emel.alt = emoji.raw;
                                 emel.dataset.role = "dragitem";
                                 emel.classList.add("dragitem");
+                                */
 
                                 emel.title = emoji.name;
                                 if (emoji.position)
@@ -684,7 +688,7 @@ game.addEventListener("contextmenu", e => e.preventDefault());
 game.addEventListener("pointerdown",
     e =>
     {
-        e.preventDefault()
+        //e.preventDefault()
 
         console.log("pd", gameState.menuOpen, e);
 
