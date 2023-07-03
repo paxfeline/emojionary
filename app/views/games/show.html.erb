@@ -263,9 +263,14 @@ body
 <div id="judge">
     <div id="judge-panel">
         <button
-            style="font-size: 16vw;"
+            style="font-size: 10vw;"
             onclick="startCountdown()">
             Start Countdown
+        </button>
+        <button
+            style="font-size: 10vw;"
+            onclick="newPrompt()">
+            New Prompt
         </button>
     </div>
     <div id="ready-readout"></div>
@@ -332,6 +337,11 @@ window.App = window.App || {}
 function startCountdown()
 {
     App.subc.perform("start_countdown");
+}
+
+function newPrompt()
+{
+    App.subc.perform("new_prompt");
 }
 
 function showMenu(e)

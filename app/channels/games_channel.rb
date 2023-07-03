@@ -122,12 +122,6 @@ class GamesChannel < ApplicationCable::Channel
         judge.last_judged = Time.now.to_datetime
         game.prompt = Prompt.all.sample
         game.judge = judge;
-        
-        # use usedprompt
-        up = UsedPrompt.new
-        up.prompt = game.prompt
-        up.game = game
-        up.save
 
         # prompt
         game.prompt = Prompt.all.sample
@@ -204,6 +198,16 @@ class GamesChannel < ApplicationCable::Channel
       broadcastPlayers
     else
       puts "set ready gs save error"
+    end
+  end
+
+  def new_prompt
+    game = Game.find(game_id)
+    game.prompt = Prompt.all.sample
+    if game.save
+      ActionCable.server.broadcast(game_id, { prompt: game.prompt.prompt });
+    else
+      puts "new prompt failure"
     end
   end
 
