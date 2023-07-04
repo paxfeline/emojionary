@@ -5,7 +5,7 @@
 *
 {
     box-sizing: border-box;
-    /*touch-action: none;*/
+    touch-action: none;
 }
 
 @media (orientation: portrait)
@@ -396,8 +396,6 @@ function showMenu(e)
     menuDiv.scrollTo(0, 0);
 
     gameState.menuOpen = true;
-
-    gameState.menuTimer = null;
 }
 
 function closeMenu()
@@ -692,6 +690,11 @@ game.addEventListener("pointerdown",
 
         console.log("pd", gameState.menuOpen, e);
 
+        // ignore multiple touches
+        if (gameState.pointerIDCache) return;
+
+        gameState.pointerIDCache = e.pointerId;
+
         // ignore if menu open
         if (gameState.menuOpen) return;
 
@@ -714,7 +717,10 @@ game.addEventListener("pointerdown",
                 gameState.selectedEmoji.classList.add("selected");
             }
             else
+            {
                 gameState.selectedEmoji =  null;
+                gameState.pointerIDCache = null;
+            }
         }
 
         gameState.clickCache = gameState.selectedEmoji;
@@ -726,9 +732,12 @@ game.addEventListener("pointermove",
     {
         //console.log("pm", gameState.dragging);
         
+        if (e.pointerId != gameState.pointerIDCache) return;
+
         // delay this until drag actually starts
         // selectedEmoji comes from pointerdown
         // will be equal to e.target
+        // TODO: maybe move back to pd?
         if (gameState.clickCache && !gameState.dragging)
         {
             // start drag
@@ -736,6 +745,10 @@ game.addEventListener("pointermove",
 
             if (role == "dragitem")
             {
+                // seems ok but maybe not needed
+                // TODO: check this
+                e.preventDefault();
+
                 gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
                 game.setPointerCapture(e.pointerId);
                 gameState.dragging = e.target.cloneNode(true);
@@ -752,6 +765,7 @@ game.addEventListener("pointermove",
             }
         }
 
+        // ensure there is a drag item and the pointer ID matches
         if (!gameState.dragging) return;
 
         e.preventDefault();
@@ -810,13 +824,10 @@ game.addEventListener("pointerup",
     {
         console.log("pu", e.target.dataset.role, e);
 
-        if (gameState.menuTimer)
-        {
-            clearTimeout(gameState.menuTimer);
-            gameState.menuTimer = null;
-        }
+        if (gameState.pointerIDCache != e.pointerId) return;
 
         gameState.clickCache = null;
+        gameState.pointerIDCache = null;
 
         game.releasePointerCapture(e.pointerId);
 
