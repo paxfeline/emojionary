@@ -30,6 +30,9 @@
 !/tmp/storage/.keep
 
 /public/assets
+/public/x-unicode/*
+/public/xx-unicode/*
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
