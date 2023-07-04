@@ -854,112 +854,102 @@ game.addEventListener("pointerup",
         
         d.classList.remove("dropzone-active");
 
-        /*
-        t.addEventListener("transitionend",
-            function tee(e)
+               
+               
+        if (d.dataset.roleExtra == "hand")
+        {
+            // items in hand should have no style attribute
+            t.removeAttribute("style");
+
+            
+            if (gameState.fromHand)
             {
-                debugger;
-                */
-               
-               
-                if (d.dataset.roleExtra == "hand")
-                {
-                    // items in hand should have no style attribute
-                    t.removeAttribute("style");
-
-                    /*
-                    if (gameState.fromHand)
-                    {
-                        gameState.dragOrig.classList.remove("vis-hid");
-                        t.remove();
-                        gameState.dragging = null;
-                    }
-                    else
-                    {
-                        */
-                        gameState.dragOrig.remove();
-
-                        t.classList.remove("dragitem-dragging");
-            
-                        /* don't bother:
-
-                        // find item dropped on
-                        while ( hit = hits.pop() )
-                        {
-                            if (hit.dataset.role == "dragitem" && hit != gameState.dragging)
-                            {
-                                //console.log("hit", hit);
-                                d.insertBefore(t, hit);
-                                gameState.dragging = null;
-
-                                // send update
-                                var em = gameState.hand.find( el => el.name == t.title );
-                                em.position = t.getAttribute("style");
-
-                                App.subc.perform("update", { hand: gameState.hand });
-                                return;
-                            }
-                        }
-                        */
-
-                        //debugger;
-                        gameState.dragging = null;
-                        d.appendChild(t);
-                    //}
-                }
-                else
-                {
-                    //var y = t.offsetTop - d.offsetTop;
-
-                    gameState.dragOrig.remove();
-                    gameState.dragging = null;
-            
-                    var x = getLeft(t) - d.offsetLeft;
-                    var y = getTop(t) - d.offsetTop;
-
-                    var width = t.offsetWidth;
-                    var height = t.offsetHeight;
-
-                    var left = x / (d.offsetWidth - width);
-                    var top = y / (d.offsetHeight - height);
-            
-                    //console.log(Number(t.dataset.y) + (e.pageY - gameState.start.y));
-            
-                    /*
-                    t.style.left = `${x}px`;
-                    t.style.top = `${y}px`;
-                   
-                    t.style.left = `${left * 100}%`;
-                    t.style.top = `${top * 100}%`;
-                    */
-
-                   t.style.left = `calc((100% - var(--base-size) * var(--scale, 1)) * ${left})`;
-                   t.style.top = `calc((100% - var(--base-size) * var(--scale, 1)) * ${top})`;
-                   
-                   t.style.position = "absolute";
-                   t.classList.remove("dragitem-dragging");
-            
-                   d.append(t);
-
-                   //t.removeEventListener("transitionend", tee);
-                }
-
-                // fix up game hand:
-                // move emoji to last spot
-
-                var ind = gameState.hand.findIndex( el => el.name == t.title );
-
-                var [em] = gameState.hand.splice(ind, 1);
-
-                em.position = t.getAttribute("style");
-
-                gameState.hand.push(em);
-
-                App.subc.perform("update", { hand: gameState.hand });
-            /*
+                t.classList.remove("dragitem-dragging");
+                gameState.dragging = null;
+                d.insertBefore(t, gameState.dragOrig);
+                gameState.dragOrig.remove();
             }
-        );
-        */
+            else
+            {
+                gameState.dragOrig.remove();
+
+                t.classList.remove("dragitem-dragging");
+    
+                /* don't bother:
+
+                // find item dropped on
+                while ( hit = hits.pop() )
+                {
+                    if (hit.dataset.role == "dragitem" && hit != gameState.dragging)
+                    {
+                        //console.log("hit", hit);
+                        d.insertBefore(t, hit);
+                        gameState.dragging = null;
+
+                        // send update
+                        var em = gameState.hand.find( el => el.name == t.title );
+                        em.position = t.getAttribute("style");
+
+                        App.subc.perform("update", { hand: gameState.hand });
+                        return;
+                    }
+                }
+                */
+
+                //debugger;
+                gameState.dragging = null;
+                d.appendChild(t);
+            }
+        }
+        else
+        {
+            //var y = t.offsetTop - d.offsetTop;
+
+            gameState.dragOrig.remove();
+            gameState.dragging = null;
+    
+            var x = getLeft(t) - d.offsetLeft;
+            var y = getTop(t) - d.offsetTop;
+
+            var width = t.offsetWidth;
+            var height = t.offsetHeight;
+
+            var left = x / (d.offsetWidth - width);
+            var top = y / (d.offsetHeight - height);
+    
+            //console.log(Number(t.dataset.y) + (e.pageY - gameState.start.y));
+    
+            /*
+            t.style.left = `${x}px`;
+            t.style.top = `${y}px`;
+            
+            t.style.left = `${left * 100}%`;
+            t.style.top = `${top * 100}%`;
+            */
+
+            t.style.left = `calc((100% - var(--base-size) * var(--scale, 1)) * ${left})`;
+            t.style.top = `calc((100% - var(--base-size) * var(--scale, 1)) * ${top})`;
+            
+            t.style.position = "absolute";
+            t.classList.remove("dragitem-dragging");
+    
+            d.append(t);
+
+            //t.removeEventListener("transitionend", tee);
+        }
+
+        // fix up game hand:
+        // move emoji to last spot
+
+        var ind = gameState.hand.findIndex( el => el.name == t.title );
+
+        var [em] = gameState.hand.splice(ind, 1);
+
+        em.position = t.getAttribute("style");
+
+        gameState.hand.push(em);
+
+        App.subc.perform("update", { hand: gameState.hand });
     }
 );
 
