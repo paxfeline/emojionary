@@ -277,7 +277,7 @@ body
 
 <div id="game">
     <div id="board-holder">
-        <div id="board" class="dropzone" data-role="dropzone">
+        <div id="board" class="dropzone" data-role="dropzone" data-role-extra="canvas">
         </div>
     </div>
     <div id="hand" class="dropzone" data-role="dropzone" data-role-extra="hand">
@@ -789,6 +789,13 @@ game.addEventListener("pointermove",
             }
         }
 
+        // if outsize dropzone, undo hot element
+        if (!hit && gameState.hot)
+        {
+            gameState.hot.classList.remove("dropzone-active");
+            gameState.hot = null;
+        }
+
         var t = gameState.dragging;
 
         //console.log(`${Number(t.dataset.x) + (e.pageX - gameState.start.x)}px\n${Number(t.dataset.y) + (e.pageY - gameState.start.y)}px`);
@@ -844,7 +851,7 @@ game.addEventListener("pointerup",
         }
 
         var t = gameState.dragging;
-        var d = hit;
+        var d = hit || handDiv; // handDiv is default in case dropped outside a normal zone
 
         if (!t || !d) return;
 
@@ -854,14 +861,47 @@ game.addEventListener("pointerup",
         
         d.classList.remove("dropzone-active");
 
-               
-               
-        if (d.dataset.roleExtra == "hand")
+        if (d.dataset.roleExtra == "canvas")
+        {
+            //var y = t.offsetTop - d.offsetTop;
+
+            gameState.dragOrig.remove();
+            gameState.dragging = null;
+    
+            var x = getLeft(t) - d.offsetLeft;
+            var y = getTop(t) - d.offsetTop;
+
+            var width = t.offsetWidth;
+            var height = t.offsetHeight;
+
+            var left = x / (d.offsetWidth - width);
+            var top = y / (d.offsetHeight - height);
+    
+            //console.log(Number(t.dataset.y) + (e.pageY - gameState.start.y));
+    
+            /*
+            t.style.left = `${x}px`;
+            t.style.top = `${y}px`;
+            
+            t.style.left = `${left * 100}%`;
+            t.style.top = `${top * 100}%`;
+            */
+
+            t.style.left = `calc((100% - var(--base-size) * var(--scale, 1)) * ${left})`;
+            t.style.top = `calc((100% - var(--base-size) * var(--scale, 1)) * ${top})`;
+            
+            t.style.position = "absolute";
+            t.classList.remove("dragitem-dragging");
+    
+            d.append(t);
+
+            //t.removeEventListener("transitionend", tee);
+        }
+        else
         {
             // items in hand should have no style attribute
             t.removeAttribute("style");
 
-            
             if (gameState.fromHand)
             {
                 t.classList.remove("dragitem-dragging");
@@ -900,42 +940,6 @@ game.addEventListener("pointerup",
                 gameState.dragging = null;
                 d.appendChild(t);
             }
-        }
-        else
-        {
-            //var y = t.offsetTop - d.offsetTop;
-
-            gameState.dragOrig.remove();
-            gameState.dragging = null;
-    
-            var x = getLeft(t) - d.offsetLeft;
-            var y = getTop(t) - d.offsetTop;
-
-            var width = t.offsetWidth;
-            var height = t.offsetHeight;
-
-            var left = x / (d.offsetWidth - width);
-            var top = y / (d.offsetHeight - height);
-    
-            //console.log(Number(t.dataset.y) + (e.pageY - gameState.start.y));
-    
-            /*
-            t.style.left = `${x}px`;
-            t.style.top = `${y}px`;
-            
-            t.style.left = `${left * 100}%`;
-            t.style.top = `${top * 100}%`;
-            */
-
-            t.style.left = `calc((100% - var(--base-size) * var(--scale, 1)) * ${left})`;
-            t.style.top = `calc((100% - var(--base-size) * var(--scale, 1)) * ${top})`;
-            
-            t.style.position = "absolute";
-            t.classList.remove("dragitem-dragging");
-    
-            d.append(t);
-
-            //t.removeEventListener("transitionend", tee);
         }
 
         // fix up game hand:
