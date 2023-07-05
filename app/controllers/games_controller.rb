@@ -10,6 +10,8 @@ class GamesController < ApplicationController
     #puts @game.inspect
 
     #debugger
+    
+    puts "game: #{params[:game_id]}\negpi: #{cookies[:emoji_game_player_id]}"
 
     if cookies[:emoji_game_player_id].present?
       @user = Player.find_by(id: cookies[:emoji_game_player_id])
