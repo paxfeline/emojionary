@@ -7,7 +7,7 @@ module ApplicationCable
     def connect
       #puts "cookies"
       #puts cookies.inspect
-      self.player_id = cookies[:emoji_game_player_id]
+      self.player_id = cookies.permanent.signed[:emoji_game_player_id]
       #debugger
       self.game_id = request.params[:game_id]
       #debugger

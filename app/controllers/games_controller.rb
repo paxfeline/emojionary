@@ -11,17 +11,17 @@ class GamesController < ApplicationController
 
     #debugger
     
-    puts "game: #{params[:game_id]}\negpi: #{cookies[:emoji_game_player_id]}"
+    puts "game: #{params[:game_id]}\negpi: #{cookies.signed[:emoji_game_player_id]}"
 
-    if cookies[:emoji_game_player_id].present?
-      @user = Player.find_by(id: cookies[:emoji_game_player_id])
+    if cookies.signed[:emoji_game_player_id].present?
+      @user = Player.find_by(id: cookies.signed[:emoji_game_player_id])
     end
 
     if @user.nil?
       @user = Player.new
 
       if @user.save
-        cookies[:emoji_game_player_id] = @user.id
+        cookies.permanent.signed[:emoji_game_player_id] = @user.id
 
         #puts @user.inspect
       else
@@ -52,10 +52,10 @@ class GamesController < ApplicationController
     @game = Game.new(game_params)
 
     # find or create player
-    if cookies[:emoji_game_player_id].present?
-      @judge = Player.find_by(id: cookies[:emoji_game_player_id])
+    if cookies.signed[:emoji_game_player_id].present?
+      @judge = Player.find_by(id: cookies.signed[:emoji_game_player_id])
       if @judge.nil?
-        cookies[:emoji_game_player_id] = nil
+        cookies.permanent.signed[:emoji_game_player_id] = nil
         @judge = Player.new
       end
     else
@@ -70,8 +70,8 @@ class GamesController < ApplicationController
     if @judge.save
       @game.judge = @judge
       if @game.save
-        if cookies[:emoji_game_player_id].nil?
-          cookies[:emoji_game_player_id] = @judge.id
+        if cookies.signed[:emoji_game_player_id].nil?
+          cookies.permanent.signed[:emoji_game_player_id] = @judge.id
         end
         redirect_to "/play?game_id=#{@game.id}"
       else
