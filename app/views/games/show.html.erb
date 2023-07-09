@@ -416,13 +416,13 @@ function customPrompt()
         App.subc.perform("custom_prompt", {prompt: np});
 }
 
-newPromptBtn.addEventListener("mousedown",
+newPromptBtn.addEventListener("pointerdown",
     e =>
     {
         gameState.customPromptTimer = setTimeout(customPrompt, 3000);
     });
 
-newPromptBtn.addEventListener("mouseup",
+newPromptBtn.addEventListener("pointerup",
     e =>
     {
         if (gameState.customPromptTimer)
