@@ -211,6 +211,16 @@ class GamesChannel < ApplicationCable::Channel
     end
   end
 
+  def custom_prompt(data)
+    game = Game.find(game_id)
+    game.prompt = data["prompt"]
+    if game.save
+      ActionCable.server.broadcast(game_id, { prompt: game.prompt.prompt });
+    else
+      puts "new prompt failure"
+    end
+  end
+
   def set_name(data)
     player = Player.find(player_id)
     player.name = data["name"]

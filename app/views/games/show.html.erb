@@ -288,6 +288,11 @@ body
     pointer-events: none;
 }
 
+#new-prompt-btn
+{
+    font-size: 10vw;
+}
+
 </style>
 
 <div id="prompt-div">
@@ -311,8 +316,7 @@ body
             Start Countdown
         </button>
         <button
-            style="font-size: 10vw;"
-            onclick="newPrompt()">
+            id="new-prompt-btn">
             New Prompt
         </button>
     </div>
@@ -378,6 +382,7 @@ var menuDiv = document.querySelector("#menu");
 var menuEmojiDiv = document.querySelector("#menu-emoji");
 var menuEmojiSectionDiv = document.querySelector("#menu-emoji-section");
 var promptDiv = document.querySelector("#prompt");
+var newPromptBtn = document.querySelector("#new-prompt-btn");
 
 window.App = window.App || {}
 
@@ -400,6 +405,31 @@ function newPrompt()
 {
     App.subc.perform("new_prompt");
 }
+
+function customPrompt()
+{
+    gameState.customPromptTimer = null;
+
+    let prompt = prompt("Enter custom prompt:");
+    if (prompt)
+        App.subc.perform("custom_prompt", {prompt});
+}
+
+newPromptDiv.addEventListener("mousedown",
+    e =>
+    {
+        gameState.customPromptTimer = setTimeout(customPrompt, 3000);
+    });
+
+newPromptDiv.addEventListener("mouseup",
+    e =>
+    {
+        if (gameState.customPromptTimer)
+        {
+            clearTimeout(gameState.customPromptTimer);
+            newPrompt();
+        }
+    });
 
 function showMenu(e)
 {
