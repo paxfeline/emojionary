@@ -118,13 +118,12 @@ class GamesChannel < ApplicationCable::Channel
       Rails.application.executor.wrap do
         sleep 5
 
+        # judge
         judge = game.players.order(Arel.sql('last_judged IS NOT NULL, last_judged')).first        
         judge.last_judged = Time.now.to_datetime
-        game.prompt = Prompt.all.sample
         game.judge = judge;
-
         # prompt
-        game.prompt = Prompt.all.sample
+        game.prompt = Prompt.all.select { |i| i.game.nil? || i.game == game }.sample
         
         if judge.save && game.save
           o = game.players.inject([]) do |acc, pl|
@@ -203,7 +202,7 @@ class GamesChannel < ApplicationCable::Channel
 
   def new_prompt
     game = Game.find(game_id)
-    game.prompt = Prompt.all.sample
+    game.prompt = Prompt.all.select { |i| i.game.nil? || i.game == game }.sample
     if game.save
       ActionCable.server.broadcast(game_id, { prompt: game.prompt.prompt });
     else
@@ -213,11 +212,18 @@ class GamesChannel < ApplicationCable::Channel
 
   def custom_prompt(data)
     game = Game.find(game_id)
-    game.prompt = data["prompt"]
-    if game.save
-      ActionCable.server.broadcast(game_id, { prompt: game.prompt.prompt });
+    cust_propmp = Prompt.new
+    cust_propmp.prompt = data["prompt"]
+    cust_propmp.game = game
+    if cust_propmp.save
+      game.prompt = cust_propmp
+      if game.save
+        ActionCable.server.broadcast(game_id, { prompt: game.prompt.prompt });
+      else
+        puts "custom prompt game save failure"
+      end
     else
-      puts "new prompt failure"
+      puts "custom prompt save failure"
     end
   end
 

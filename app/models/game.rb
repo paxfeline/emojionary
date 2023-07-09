@@ -9,6 +9,8 @@ class Game < ApplicationRecord
 
     belongs_to :judge, class_name: "Player"
 
+    has_many :prompts, dependent: :destroy
+
     def deal_one(deck = nil)
         if deck.nil?
             deck = JSON.parse self.deck
@@ -77,7 +79,7 @@ private
         self.deck ||= deck.to_json
 
         # prompt
-        self.prompt ||= Prompt.all.sample
+        self.prompt ||= Prompt.all.select { |i| i.game.nil? }.sample
 
         self.judging ||= false
         

@@ -384,6 +384,7 @@ var menuEmojiSectionDiv = document.querySelector("#menu-emoji-section");
 var promptDiv = document.querySelector("#prompt");
 var newPromptBtn = document.querySelector("#new-prompt-btn");
 
+var gameState = {};
 window.App = window.App || {}
 
 function setName()
@@ -410,18 +411,18 @@ function customPrompt()
 {
     gameState.customPromptTimer = null;
 
-    let prompt = prompt("Enter custom prompt:");
-    if (prompt)
-        App.subc.perform("custom_prompt", {prompt});
+    let np = prompt("Enter custom prompt:");
+    if (np)
+        App.subc.perform("custom_prompt", {prompt: np});
 }
 
-newPromptDiv.addEventListener("mousedown",
+newPromptBtn.addEventListener("mousedown",
     e =>
     {
         gameState.customPromptTimer = setTimeout(customPrompt, 3000);
     });
 
-newPromptDiv.addEventListener("mouseup",
+newPromptBtn.addEventListener("mouseup",
     e =>
     {
         if (gameState.customPromptTimer)
@@ -726,8 +727,6 @@ if (document.readyState !== 'loading')
     cableFunc();
 else
     addEventListener("DOMContentLoaded", cableFunc);
-
-var gameState = {};
 
 // prevent browser contextual menu
 game.addEventListener("contextmenu", e => e.preventDefault());

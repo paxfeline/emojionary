@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_06_11_051730) do
+ActiveRecord::Schema[7.0].define(version: 2023_07_09_213743) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -49,6 +49,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_11_051730) do
     t.string "prompt"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "game_id"
+    t.index ["game_id"], name: "index_prompts_on_game_id"
   end
 
   create_table "used_prompts", force: :cascade do |t|
@@ -64,6 +66,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_06_11_051730) do
   add_foreign_key "game_states", "players"
   add_foreign_key "games", "players", column: "judge_id"
   add_foreign_key "games", "prompts"
+  add_foreign_key "prompts", "games"
   add_foreign_key "used_prompts", "games"
   add_foreign_key "used_prompts", "prompts"
 end
