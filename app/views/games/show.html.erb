@@ -60,7 +60,7 @@ body
 {
     line-height: 100%;
     transform: scale(var(--flipX, 1), var(--flipY, 1));
-    width: var(--base-size);
+    width: calc(var(--base-size) * var(--scale, 1));
     /*
     font-size: calc(var(--base-size) * var(--scale, 1));
     */
@@ -130,9 +130,12 @@ body
     outline: 1px solid black;
 }
 
-#field > div > span
+#field > div > img
 {
+    /*
     font-size: calc(var(--base-size) * var(--scale, 1));
+    */
+    width: calc(var(--base-size) * var(--scale, 1));
     transform: scale(var(--flipX, 1), var(--flipY, 1));
 }
 
