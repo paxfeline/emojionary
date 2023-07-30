@@ -60,17 +60,37 @@ private
         # emojis
 
         # Emoji.all.group_by(&:category).map { |k,v| { category: k, all: v.map { |e| { raw: e.raw, name: e.name, ios: e.ios_version } } } }
-        deck ||=
+        deck =
             Emoji.all.group_by(&:category).map do |k,v|
                 {
                     category: k,
                     all:
-                        # filtering out ios >= 15 'cause I can't see 'em on this laptop
-                        v.filter {|u| u.ios_version.split(".")[0].to_i < 15}.map do |e|
-                            {
-                                "raw" => e.raw, "name" => e.name, "ios" => e.ios_version, "position" => nil, "path" => e.image_filename
-                            }
+                        v.filter_map do |e|
+                            #new_filename = e.image_filename
+                            #'''
+                            name_parts = e.image_filename.split(".")
+                            name_parts[1] = "svg"
+                            new_filename = name_parts.join(".")
+                            # try breaking off just the last part of the filename
+                            if not File.exists?("public/#{new_filename}")
+                                seq_parts = name_parts[0].split("-")
+                                seq_parts.pop
+                                name_parts[0] = seq_parts.join("-")
+                                new_filename = name_parts.join(".")
+                            end
+                            #'''
+
+                            # return val:
+                            if File.exists?("public/#{new_filename}")
+                                {
+                                    "raw" => e.raw, "name" => e.name, "ios" => e.ios_version, "position" => nil, "path" => new_filename
+                                }
+                            else
+                                puts "can't find file #{e.image_filename}"
+                                nil
+                            end
                         end
+                        
                 }
             end
 
@@ -82,6 +102,9 @@ private
         self.prompt ||= Prompt.all.select { |i| i.game.nil? }.sample
 
         self.judging ||= false
+
+        puts "game setup done"
+        puts self.inspect
         
         #up = UsedPrompt.new
         #up.prompt = self.prompt

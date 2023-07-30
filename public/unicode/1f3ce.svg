@@ -1,1 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36"><path fill="#414042" d="M30 23h3l2-6h-3z"/><path fill="#F4900C" d="M29 19s-3-4-4-4h-9l-6 5-6.081 1.77c-.62.217-1.45.636-1.56 1.23L0 33c-.125.646.448 1 1 1h34c.553 0 1-.447 1-1V21c0-2-7-2-7-2z"/><path fill="#3B88C3" d="M16.094 20L11 34h12l5-14z"/><circle fill="#292F33" cx="8" cy="31" r="4"/><circle fill="#58595B" cx="8" cy="31" r="2"/><circle fill="#292F33" cx="29" cy="31" r="4"/><circle fill="#58595B" cx="29" cy="31" r="2"/><circle fill="#FFF" cx="19.5" cy="26.5" r="3.5"/><path fill="#231F20" d="M21.055 25.242c0 .441-.19.826-.574 1.072.504.23.854.699.854 1.254 0 .84-.769 1.547-1.764 1.547-1.037 0-1.682-.764-1.682-1.316 0-.273.287-.469.539-.469.477 0 .364.818 1.156.818.363 0 .658-.279.658-.65 0-.98-1.191-.26-1.191-1.086 0-.734.995-.238.995-1.016 0-.266-.188-.469-.505-.469-.665 0-.574.686-1.05.686-.288 0-.456-.258-.456-.518 0-.547.75-1.135 1.527-1.135 1.009.001 1.493.737 1.493 1.282z"/><path fill="#F4900C" d="M30 18l1-1 5-1v2z"/><path fill="#88C9F9" d="M17 16h8v4H12z"/><path fill="#FFCC4D" d="M6 24c0 .553-.448 1-1 1H3c-.552 0-1-.447-1-1 0-.553.448-1 1-1h2c.552 0 1 .447 1 1z"/><path fill="#DD2E44" d="M36 22h-1c-.553 0-1 .447-1 1v1c0 .553.447 1 1 1h1v-3z"/></svg>
+<svg id="emoji" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <g id="color">
+    <path fill="#d22f27" stroke="none" d="M5,50.7705c0,0-1.5518,4.167,0.0313,4.167c1.583,0,15.5,0,15.5,0h9.333h30.75l1.8339-2h4.5l0.4161-9.833 l-0.833-6.667l-9.167-0.583l-2.833,1.083l-0.0733,1.918l5.2285,5.0625l-3.9052,0.0195c0,0-0.7481-2-3.0821-2.584 s-11.167-2.417-11.167-2.417l-0.583,4.5c0,0-10.9814-0.0205-14.3965,0.4395c-1.9697,0.2656-6.6562,0.6289-10.9384,1.624 c-3.2286,0.75-5.792,3.4795-8.9151,4.5L5,50.7705z"/>
+    <path fill="#ea5a47" stroke="none" d="M10.2197,53.376c0,0-5.7822,1.084-4.2197-0.292c0,0,3.9688-2.6465,13.6123-2.8965l-2.7998,3.3906 l-4.0195,1.2158L10.2197,53.376z"/>
+    <polygon fill="#ea5a47" stroke="none" points="41.5625,43.6875 41.751,38.916 54.0625,42.0625 55.125,45 45.625,45"/>
+    <polygon fill="#ea5a47" stroke="none" points="55.1875,34.125 55,38 67,38 66.8125,34"/>
+    <circle cx="58.75" cy="52" r="2.8281" fill="#d0cfce" stroke="none"/>
+    <circle cx="21.5" cy="52" r="2.8281" fill="#d0cfce" stroke="none"/>
+  </g>
+  <g id="hair"/>
+  <g id="skin"/>
+  <g id="skin-shadow"/>
+  <g id="line">
+    <circle cx="22" cy="52" r="3" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+    <circle cx="39" cy="42" r="3" fill="#000000" stroke="none"/>
+    <circle cx="59" cy="52" r="3" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+    <polyline fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" points="65.625,52 67,52 67,35 55,35 55,38 58.1875,41.1084"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M16,53l-1,1H5v-4c0,0,13-6,26-6h20"/>
+    <line x1="29" x2="53" y1="54" y2="54" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"/>
+    <path fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" d="M41,43v-4c0,0,10,0,14,5"/>
+  </g>
+</svg>

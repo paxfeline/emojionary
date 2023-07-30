@@ -59,11 +59,10 @@ body
 .dragitem
 {
     line-height: 100%;
-    font-size: calc(var(--base-size) * var(--scale, 1));
     transform: scale(var(--flipX, 1), var(--flipY, 1));
-
-    /* for imgs
     width: var(--base-size);
+    /*
+    font-size: calc(var(--base-size) * var(--scale, 1));
     */
 }
 
@@ -389,7 +388,7 @@ window.App = window.App || {}
 
 function setName()
 {
-    let name = prompt("Enter your name")
+    let name = prompt("Enter your name:");
     if (name)
     {
         App.subc.perform("set_name", { name });
@@ -413,7 +412,10 @@ function customPrompt()
 
     let np = prompt("Enter custom prompt:");
     if (np)
+    {
         App.subc.perform("custom_prompt", {prompt: np});
+        closeMenu();
+    }
 }
 
 newPromptBtn.addEventListener("pointerdown",
@@ -581,16 +583,14 @@ var cableFunc =
                             emoji =>
                             {
 
-                                var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
-                                emel.innerHTML = emoji.raw;
+                                //var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
+                                //emel.innerHTML = emoji.raw;
 
-                                /*
                                 let emel = document.createElement("img");
-                                emel.src = emoji.path;
+                                emel.src = emoji.path.replace(".png", ".svg");
                                 emel.alt = emoji.raw;
                                 emel.dataset.role = "dragitem";
                                 emel.classList.add("dragitem");
-                                */
 
                                 emel.title = emoji.name;
                                 if (emoji.position)
