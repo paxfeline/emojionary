@@ -661,9 +661,16 @@ var cableFunc =
                                 player.art.forEach(
                                     emoji =>
                                     {
-                                        var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
-                                        emel.innerHTML = emoji.raw;
+                                        //var emel = document.querySelector("#emoji-piece-template").content.firstElementChild.cloneNode(true);
+                                        //emel.innerHTML = emoji.raw;
+
+                                        let emel = document.createElement("img");
+                                        emel.src = emoji.path.replace(".png", ".svg");
+                                        emel.alt = emoji.raw;
+                                        emel.dataset.role = "dragitem";
+                                        emel.classList.add("dragitem");
                                         emel.title = emoji.name;
+
                                         var style = text2CSS(emoji.position);
                                         emel.style.left = style.left;
                                         emel.style.top = style.top;
