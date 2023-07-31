@@ -884,8 +884,7 @@ function getLeft(elem)
     return rect.left + window.scrollX;
 }
 
-game.addEventListener("pointercancel",
-    e =>
+let pointerCancel = e =>
     {
         console.log("pc");
 
@@ -908,7 +907,10 @@ game.addEventListener("pointercancel",
         //debugger;
         gameState.dragging = null;
         d.appendChild(t);
-    });
+    };
+
+game.addEventListener("pointercancel", pointerCancel);
+game.addEventListener("contextmenu", pointerCancel);
 
 game.addEventListener("pointerup",
     e =>
