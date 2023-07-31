@@ -1023,6 +1023,8 @@ game.addEventListener("pointerup",
                 gameState.dragging = null;
                 d.insertBefore(t, gameState.dragOrig);
                 gameState.dragOrig.remove();
+
+                return; // avoid the reshuffle below
             }
             else
             {
