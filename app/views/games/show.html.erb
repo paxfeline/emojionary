@@ -886,17 +886,30 @@ let pointerCancel = e =>
         game.releasePointerCapture(e.pointerId);
 
         var t = gameState.dragging;
-        var d = handDiv; // handDiv is default in case dropped outside a normal zone
 
-        d.classList.remove("dropzone-active");
-
+        if (gameState.hot)
+            gameState.hot.classList.remove("dropzone-active");
+            
         gameState.dragOrig.remove();
 
         t.classList.remove("dragitem-dragging");
 
         //debugger;
         gameState.dragging = null;
-        d.appendChild(t);
+        handDiv.appendChild(t);
+
+        // fix up game hand:
+        // move emoji to last spot
+
+        var ind = gameState.hand.findIndex( el => el.name == t.title );
+
+        var [em] = gameState.hand.splice(ind, 1);
+
+        em.position = t.getAttribute("style");
+
+        gameState.hand.push(em);
+
+        App.subc.perform("update", { hand: gameState.hand });
     };
 
 game.addEventListener("pointercancel", pointerCancel);
