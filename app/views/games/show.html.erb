@@ -887,7 +887,7 @@ function pointerCancel( e )
     gameState.clickCache = null;
     gameState.pointerIDCache = null;
 
-    game.releasePointerCapture(e.pointerId);
+    game.releasePointerCapture(e?.pointerId);
 
     var t = gameState.dragging;
     var d = t.parentNode;
