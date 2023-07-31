@@ -6,6 +6,7 @@
 {
     box-sizing: border-box;
     touch-action: none;
+    -webkit-touch-callout: none;
 }
 
 @media (orientation: portrait)
@@ -934,10 +935,11 @@ function pointerCancel( e )
 }
 
 game.addEventListener("pointercancel", pointerCancel);
-//game.addEventListener("contextmenu", e => {console.log("cm"); pointerCancel(e);});
+
+game.addEventListener("contextmenu", e => {console.log("cm"); pointerCancel(e);});
 
 // prevent browser contextual menu
-game.addEventListener("contextmenu", e => e.preventDefault());
+//game.addEventListener("contextmenu", e => e.preventDefault());
 
 game.addEventListener("pointerup",
     e =>
