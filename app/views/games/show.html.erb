@@ -738,9 +738,6 @@ if (document.readyState !== 'loading')
 else
     addEventListener("DOMContentLoaded", cableFunc);
 
-// prevent browser contextual menu
-game.addEventListener("contextmenu", e => e.preventDefault());
-
 game.addEventListener("pointerdown",
     e =>
     {
@@ -772,32 +769,35 @@ game.addEventListener("pointerdown",
             {
                 gameState.selectedEmoji =  e.target;
                 gameState.selectedEmoji.classList.add("selected");
-
-                // start drag
-
-                // seems ok but maybe not needed
-                // TODO: check this
-                e.preventDefault();
-
-                gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
-                game.setPointerCapture(e.pointerId);
-                gameState.dragging = e.target.cloneNode(true);
-                gameState.selectedEmoji = gameState.dragging;
-                gameState.dragOrig = e.target;
-                e.target.parentNode.appendChild(gameState.dragging);
-                e.target.classList.add("vis-hid");
-                //console.log(gameState.dragging.classList);
-                gameState.dragging.classList.add("dragitem-dragging");
-                gameState.dragging.dataset.x = e.target.offsetLeft - e.target.parentNode.scrollLeft;
-                gameState.dragging.dataset.y = e.target.offsetTop; // + e.target.parentNode.offsetTop;
-                gameState.dragging.style.left = `${gameState.dragging.dataset.x}px`;
-                gameState.dragging.style.top = `${gameState.dragging.dataset.y}px`;
             }
             else
             {
                 gameState.selectedEmoji =  null;
                 gameState.pointerIDCache = null;
             }
+        }
+
+        if (gameState.selectedEmoji && e.target.dataset.role)
+        {
+            // start drag
+
+            // seems ok but maybe not needed
+            // TODO: check this
+            e.preventDefault();
+
+            gameState.fromHand = e.target.parentNode.dataset.roleExtra == "hand";
+            game.setPointerCapture(e.pointerId);
+            gameState.dragging = e.target.cloneNode(true);
+            gameState.selectedEmoji = gameState.dragging;
+            gameState.dragOrig = e.target;
+            e.target.parentNode.appendChild(gameState.dragging);
+            e.target.classList.add("vis-hid");
+            //console.log(gameState.dragging.classList);
+            gameState.dragging.classList.add("dragitem-dragging");
+            gameState.dragging.dataset.x = e.target.offsetLeft - e.target.parentNode.scrollLeft;
+            gameState.dragging.dataset.y = e.target.offsetTop; // + e.target.parentNode.offsetTop;
+            gameState.dragging.style.left = `${gameState.dragging.dataset.x}px`;
+            gameState.dragging.style.top = `${gameState.dragging.dataset.y}px`;
         }
 
         // for starting drag in pm:
@@ -880,6 +880,9 @@ let pointerCancel = e =>
 
         if (gameState.pointerIDCache != e.pointerId) return;
 
+        // for contextmenu canceling
+        e.preventDefault();
+
         gameState.clickCache = null;
         gameState.pointerIDCache = null;
 
@@ -913,7 +916,10 @@ let pointerCancel = e =>
     };
 
 game.addEventListener("pointercancel", pointerCancel);
-game.addEventListener("contextmenu", pointerCancel);
+//game.addEventListener("contextmenu", e => {console.log("cm"); pointerCancel(e);});
+
+// prevent browser contextual menu
+game.addEventListener("contextmenu", e => e.preventDefault());
 
 game.addEventListener("pointerup",
     e =>
