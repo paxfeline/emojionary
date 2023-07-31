@@ -1,4 +1,4 @@
-<% content_for :title, "Play Emoji2Emoji" %>
+<% content_for :title, "Play Apples 2 Emojis" %>
 
 <style>
 
@@ -743,11 +743,14 @@ game.addEventListener("pointerdown",
     {
         //e.preventDefault()
 
-        console.log("pd", gameState.menuOpen, e);
-
         // ignore if touch has already began
         // allow if primary pointer
-        if (!e.isPrimary && gameState.pointerIDCache) return;
+        if (!e.isPrimary) return;
+
+        console.log("pd", gameState.menuOpen, e);
+
+        if (gameState.pointerIDCache)
+            pointerCancel();
 
         gameState.pointerIDCache = e.pointerId;
 
@@ -875,25 +878,37 @@ function getLeft(elem)
     return rect.left + window.scrollX;
 }
 
-let pointerCancel = e =>
+function pointerCancel( e )
+{
+    console.log("pc");
+
+    if (e && gameState.pointerIDCache != e.pointerId) return;
+
+    gameState.clickCache = null;
+    gameState.pointerIDCache = null;
+
+    game.releasePointerCapture(e.pointerId);
+
+    var t = gameState.dragging;
+    var d = t.parentNode;
+
+    if (gameState.hot)
+        gameState.hot.classList.remove("dropzone-active");
+        
+    if (d.dataset.roleExtra == "canvas")
     {
-        console.log("pc");
+        //var y = t.offsetTop - d.offsetTop;
 
-        if (gameState.pointerIDCache != e.pointerId) return;
+        gameState.dragOrig.remove();
+        gameState.dragging = null;
+        
+        t.style.position = "absolute";
+        t.classList.remove("dragitem-dragging");
 
-        // for contextmenu canceling
-        e.preventDefault();
-
-        gameState.clickCache = null;
-        gameState.pointerIDCache = null;
-
-        game.releasePointerCapture(e.pointerId);
-
-        var t = gameState.dragging;
-
-        if (gameState.hot)
-            gameState.hot.classList.remove("dropzone-active");
-            
+        d.append(t);
+    }
+    else
+    {
         gameState.dragOrig.remove();
 
         t.classList.remove("dragitem-dragging");
@@ -901,20 +916,21 @@ let pointerCancel = e =>
         //debugger;
         gameState.dragging = null;
         handDiv.appendChild(t);
+    }
 
-        // fix up game hand:
-        // move emoji to last spot
+    // fix up game hand:
+    // move emoji to last spot
 
-        var ind = gameState.hand.findIndex( el => el.name == t.title );
+    var ind = gameState.hand.findIndex( el => el.name == t.title );
 
-        var [em] = gameState.hand.splice(ind, 1);
+    var [em] = gameState.hand.splice(ind, 1);
 
-        em.position = t.getAttribute("style");
+    em.position = t.getAttribute("style");
 
-        gameState.hand.push(em);
+    gameState.hand.push(em);
 
-        App.subc.perform("update", { hand: gameState.hand });
-    };
+    App.subc.perform("update", { hand: gameState.hand });
+}
 
 game.addEventListener("pointercancel", pointerCancel);
 //game.addEventListener("contextmenu", e => {console.log("cm"); pointerCancel(e);});
@@ -1011,27 +1027,6 @@ game.addEventListener("pointerup",
 
                 t.classList.remove("dragitem-dragging");
     
-                /* don't bother:
-
-                // find item dropped on
-                while ( hit = hits.pop() )
-                {
-                    if (hit.dataset.role == "dragitem" && hit != gameState.dragging)
-                    {
-                        //console.log("hit", hit);
-                        d.insertBefore(t, hit);
-                        gameState.dragging = null;
-
-                        // send update
-                        var em = gameState.hand.find( el => el.name == t.title );
-                        em.position = t.getAttribute("style");
-
-                        App.subc.perform("update", { hand: gameState.hand });
-                        return;
-                    }
-                }
-                */
-
                 //debugger;
                 gameState.dragging = null;
                 d.appendChild(t);
