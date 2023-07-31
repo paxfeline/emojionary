@@ -763,7 +763,6 @@ game.addEventListener("pointerdown",
 
         //if (e.target.dataset.role != "dragitem") return;
 
-        // will likely be overwritten by pm wiggle
         if (e.target != gameState.selectedEmoji)
         {
             if (gameState.selectedEmoji)
@@ -773,36 +772,9 @@ game.addEventListener("pointerdown",
             {
                 gameState.selectedEmoji =  e.target;
                 gameState.selectedEmoji.classList.add("selected");
-            }
-            else
-            {
-                gameState.selectedEmoji =  null;
-                gameState.pointerIDCache = null;
-            }
-        }
 
-        gameState.clickCache = gameState.selectedEmoji;
-    }
-);
+                // start drag
 
-game.addEventListener("pointermove",
-    e =>
-    {
-        //console.log("pm", gameState.dragging);
-        
-        if (e.pointerId != gameState.pointerIDCache) return;
-
-        // delay this until drag actually starts
-        // selectedEmoji comes from pointerdown
-        // will be equal to e.target
-        // TODO: maybe move back to pd?
-        if (gameState.clickCache && !gameState.dragging)
-        {
-            // start drag
-            var role = gameState.selectedEmoji.dataset.role;
-
-            if (role == "dragitem")
-            {
                 // seems ok but maybe not needed
                 // TODO: check this
                 e.preventDefault();
@@ -821,7 +793,25 @@ game.addEventListener("pointermove",
                 gameState.dragging.style.left = `${gameState.dragging.dataset.x}px`;
                 gameState.dragging.style.top = `${gameState.dragging.dataset.y}px`;
             }
+            else
+            {
+                gameState.selectedEmoji =  null;
+                gameState.pointerIDCache = null;
+            }
         }
+
+        // for starting drag in pm:
+        //gameState.clickCache = gameState.selectedEmoji;
+
+    }
+);
+
+game.addEventListener("pointermove",
+    e =>
+    {
+        //console.log("pm", gameState.dragging);
+        
+        if (e.pointerId != gameState.pointerIDCache) return;
 
         // ensure there is a drag item and the pointer ID matches
         if (!gameState.dragging) return;
