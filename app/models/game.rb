@@ -67,16 +67,17 @@ private
                     all:
                         v.filter_map do |e|
                             #new_filename = e.image_filename
+                            new_filename = "emojis/#{e.hex_inspect.upcase}.svg"
                             #'''
-                            name_parts = e.image_filename.split(".")
-                            name_parts[1] = "svg"
-                            new_filename = name_parts.join(".")
                             # try breaking off just the last part of the filename
                             if not File.exists?("public/#{new_filename}")
+                                name_parts = new_filename.split(".")
                                 seq_parts = name_parts[0].split("-")
-                                seq_parts.pop
-                                name_parts[0] = seq_parts.join("-")
-                                new_filename = name_parts.join(".")
+                                if seq_parts.last == "FE0F"
+                                    seq_parts.pop
+                                    name_parts[0] = seq_parts.join("-")
+                                    new_filename = name_parts.join(".")
+                                end
                             end
                             #'''
 
@@ -86,7 +87,7 @@ private
                                     "raw" => e.raw, "name" => e.name, "ios" => e.ios_version, "position" => nil, "path" => new_filename
                                 }
                             else
-                                puts "can't find file #{e.image_filename}"
+                                puts "Can't find #{e.name} = #{e.image_filename}, tried #{new_filename}"
                                 nil
                             end
                         end
