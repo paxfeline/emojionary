@@ -590,7 +590,7 @@ var cableFunc =
                                 //emel.innerHTML = emoji.raw;
 
                                 let emel = document.createElement("img");
-                                emel.src = emoji.path.replace(".png", ".svg");
+                                emel.src = emoji.path;
                                 emel.alt = emoji.raw;
                                 emel.dataset.role = "dragitem";
                                 emel.classList.add("dragitem");
@@ -668,7 +668,7 @@ var cableFunc =
                                         //emel.innerHTML = emoji.raw;
 
                                         let emel = document.createElement("img");
-                                        emel.src = emoji.path.replace(".png", ".svg");
+                                        emel.src = emoji.path;
                                         emel.alt = emoji.raw;
                                         emel.dataset.role = "dragitem";
                                         emel.classList.add("dragitem");
@@ -883,6 +883,32 @@ function getLeft(elem)
     var rect = elem.getBoundingClientRect();
     return rect.left + window.scrollX;
 }
+
+game.addEventListener("pointercancel",
+    e =>
+    {
+        console.log("pc");
+
+        if (gameState.pointerIDCache != e.pointerId) return;
+
+        gameState.clickCache = null;
+        gameState.pointerIDCache = null;
+
+        game.releasePointerCapture(e.pointerId);
+
+        var t = gameState.dragging;
+        var d = handDiv; // handDiv is default in case dropped outside a normal zone
+
+        d.classList.remove("dropzone-active");
+
+        gameState.dragOrig.remove();
+
+        t.classList.remove("dragitem-dragging");
+
+        //debugger;
+        gameState.dragging = null;
+        d.appendChild(t);
+    });
 
 game.addEventListener("pointerup",
     e =>
