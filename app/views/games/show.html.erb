@@ -745,8 +745,9 @@ game.addEventListener("pointerdown",
 
         console.log("pd", gameState.menuOpen, e);
 
-        // ignore multiple touches
-        if (gameState.pointerIDCache) return;
+        // ignore if touch has already began
+        // allow if primary pointer
+        if (!e.isPrimary && gameState.pointerIDCache) return;
 
         gameState.pointerIDCache = e.pointerId;
 
