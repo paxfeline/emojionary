@@ -596,6 +596,8 @@ var cableFunc =
                                 emel.dataset.role = "dragitem";
                                 emel.classList.add("dragitem");
 
+                                emel.setAttribute("draggable", "false");
+
                                 emel.title = emoji.name;
                                 if (emoji.position)
                                 {
@@ -941,11 +943,13 @@ game.addEventListener("contextmenu", e => {console.log("cm"); pointerCancel(e);}
 // prevent browser contextual menu
 //game.addEventListener("contextmenu", e => e.preventDefault());
 
+/*
 game.addEventListener('dragstart',
     e =>
     {
         e.preventDefault();
     });
+*/
 
 game.addEventListener("pointerup",
     e =>
