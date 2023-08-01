@@ -944,10 +944,16 @@ game.addEventListener("contextmenu", e => {console.log("cm"); pointerCancel(e);}
 game.addEventListener('touchforcechange',
     e =>
     {
-        if (e.changedTouches[0].force > MouseEvent.WEBKIT_FORCE_AT_MOUSE_DOWN)
+        if ("webkitForce" in event)
         {
-            e.preventDefault();
-            return false;
+            // Retrieve the force level
+            var forceLevel = e["webkitForce"];
+
+            if (forceLevel > MouseEvent.WEBKIT_FORCE_AT_MOUSE_DOWN)
+            {
+                e.preventDefault();
+                return false;
+            }
         }
     });
 
