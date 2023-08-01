@@ -114,6 +114,11 @@ class GamesChannel < ApplicationCable::Channel
     game = Game.find(game_id)
     ActionCable.server.broadcast(game_id, { cmd: "pick", player: data["player"] });
 
+    # cache winner for all but judge
+    cw = GameState.find_by(game: game, player: game.judge).state
+    artists = GameState.where(game: game).where.not(player: game.judge)
+    artists.update_all(cached_winner: cw)
+
     #Thread.new do
       #Rails.application.executor.wrap do
         #sleep 5
