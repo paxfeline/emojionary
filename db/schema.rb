@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_01_051632) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_01_174646) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -23,6 +23,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_01_051632) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "cached_winner"
+    t.string "cached_gallery"
     t.index ["game_id"], name: "index_game_states_on_game_id"
     t.index ["player_id"], name: "index_game_states_on_player_id"
   end
