@@ -941,20 +941,10 @@ game.addEventListener("contextmenu", e => {console.log("cm"); pointerCancel(e);}
 // prevent browser contextual menu
 //game.addEventListener("contextmenu", e => e.preventDefault());
 
-game.addEventListener('touchforcechange',
+game.addEventListener('dragstart',
     e =>
     {
-        if ("webkitForce" in event)
-        {
-            // Retrieve the force level
-            var forceLevel = e["webkitForce"];
-
-            if (forceLevel > MouseEvent.WEBKIT_FORCE_AT_MOUSE_DOWN)
-            {
-                e.preventDefault();
-                return false;
-            }
-        }
+        e.preventDefault();
     });
 
 game.addEventListener("pointerup",
