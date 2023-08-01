@@ -941,6 +941,16 @@ game.addEventListener("contextmenu", e => {console.log("cm"); pointerCancel(e);}
 // prevent browser contextual menu
 //game.addEventListener("contextmenu", e => e.preventDefault());
 
+game.addEventListener('touchforcechange',
+    e =>
+    {
+        if (e.changedTouches[0].force > MouseEvent.WEBKIT_FORCE_AT_MOUSE_DOWN)
+        {
+            e.preventDefault();
+            return false;
+        }
+    });
+
 game.addEventListener("pointerup",
     e =>
     {
