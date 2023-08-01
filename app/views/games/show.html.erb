@@ -117,14 +117,14 @@ body
     height: 100vh;
 }
 
-#fieldCond
+#fieldCont
 {
     overflow: initial;
     height: 100%;
     touch-action: initial;
 }
 
-#fieldCond *
+#fieldCont *
 {
     touch-action: initial;
 }
@@ -338,6 +338,7 @@ body
     <div id="ready-readout"></div>
     <div id="fieldCont">
         <h2 id="judge-text">Click on an artwork to select it</h2>
+        <button id="resume-btn" onclick="gameState.resumeFunc()">Ready for next round</button>
         <div id="field"></div>
     </div>
 </div>
@@ -392,6 +393,7 @@ var judgePanelDiv = document.querySelector("#judge-panel");
 var fieldContDiv = document.querySelector("#fieldCont");
 var fieldDiv = document.querySelector("#field");
 var judgeTextDiv = document.querySelector("#judge-text");
+var resumeBtn = document.querySelector("#resume-btn");
 var countdownDiv = document.querySelector("#countdown");
 var menuDiv = document.querySelector("#menu");
 var menuEmojiDiv = document.querySelector("#menu-emoji");
@@ -566,6 +568,16 @@ var cableFunc =
                 // Called when there's incoming data on the websocket for this channel
                     console.log("cable incoming", data);
 
+                    if (gameState.artPause)
+                    {
+                        if (data.broadcast)
+                        {
+                            gameState.resumeFunc = () => { gameState.artPause = false; this.received(data) };
+                            console.log("paused broadcast data:", data);
+                            return;
+                        }
+                    }
+
                     // fix up new round command
                     if (data.broadcast)
                     {
@@ -648,6 +660,7 @@ var cableFunc =
                             judgeDiv.classList.add("gone");
                             judgeTextDiv.classList.add("gone");
                         }
+                        resumeBtn.classList.add("gone");
                     }
 
                     // cmds
@@ -742,6 +755,12 @@ var cableFunc =
                     else if (data.cmd == "pick")
                     {
                         gameState.gallery[data.player].classList.add("selectedArt");
+
+                        if (gameState.role == "artist")
+                        {
+                            gameState.artPause = true;
+                            resumeBtn.classList.remove("gone");
+                        }
                     }
                 }
             }

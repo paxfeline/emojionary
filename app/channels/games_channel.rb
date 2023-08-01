@@ -114,51 +114,51 @@ class GamesChannel < ApplicationCable::Channel
     game = Game.find(game_id)
     ActionCable.server.broadcast(game_id, { cmd: "pick", player: data["player"] });
 
-    Thread.new do
-      Rails.application.executor.wrap do
-        sleep 5
+    #Thread.new do
+      #Rails.application.executor.wrap do
+        #sleep 5
 
-        # judge
-        judge = game.players.order(Arel.sql('last_judged IS NOT NULL, last_judged')).first        
-        judge.last_judged = Time.now.to_datetime
-        game.judge = judge;
-        # prompt
-        game.prompt = Prompt.all.select { |i| i.game.nil? || i.game == game }.sample
-        
-        if judge.save && game.save
-          o = game.players.inject([]) do |acc, pl|
-            game_state = GameState.find_by(player_id: pl.id, game_id: game.id)
-            start_hand = JSON.parse(game_state.state)
-            nec = start_hand.select { |el| el["position"].present? }.count
-            hand = start_hand.select { |el| el["position"].nil? }
-            nec.times { hand.append(game.deal_one) }
-            game_state.state = hand.to_json
-            game_state.ready = false
-            if game_state.save
-              acc.append(
+    # judge
+    judge = game.players.order(Arel.sql('last_judged IS NOT NULL, last_judged')).first        
+    judge.last_judged = Time.now.to_datetime
+    game.judge = judge;
+    # prompt
+    game.prompt = Prompt.all.select { |i| i.game.nil? || i.game == game }.sample
+    
+    if judge.save && game.save
+      o = game.players.inject([]) do |acc, pl|
+        game_state = GameState.find_by(player_id: pl.id, game_id: game.id)
+        start_hand = JSON.parse(game_state.state)
+        nec = start_hand.select { |el| el["position"].present? }.count
+        hand = start_hand.select { |el| el["position"].nil? }
+        nec.times { hand.append(game.deal_one) }
+        game_state.state = hand.to_json
+        game_state.ready = false
+        if game_state.save
+          acc.append(
+            {
+              player: pl.id,
+              data:
                 {
-                  player: pl.id,
-                  data:
-                    {
-                      prompt: game.prompt.prompt,
-                      role: pl.id == judge.id ? "judge" : "artist",
-                      hand: hand
-                    }
+                  prompt: game.prompt.prompt,
+                  role: pl.id == judge.id ? "judge" : "artist",
+                  hand: hand
                 }
-              )
-            else
-              puts "hand update save error"
-            end
-          end
-          
-          ActionCable.server.broadcast(game_id, { broadcast: o });
+            }
+          )
         else
-          puts "new round fail"
-          puts judge.errors.full_messages
-          puts game.errors.full_messages
+          puts "hand update save error"
         end
       end
+      
+      ActionCable.server.broadcast(game_id, { broadcast: o });
+    else
+      puts "new round fail"
+      puts judge.errors.full_messages
+      puts game.errors.full_messages
     end
+      #end
+    #end
 
   end
 
