@@ -41,7 +41,7 @@ class GamesChannel < ApplicationCable::Channel
       transmit({ id: player_id, role: game_state.cached_role })
       transmit({ cmd: "show-em", all: JSON.parse(game_state.cached_gallery) });
       if game_state.cached_winner
-        transmit({ cmd: "pick", player: JSON.parse(game_state.cached_winner) });
+        transmit({ cmd: "pick", player: game_state.cached_winner });
       end
     end
     
