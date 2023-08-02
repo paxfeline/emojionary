@@ -8,24 +8,11 @@ class GamesChannel < ApplicationCable::Channel
     # broadcast initial message here
     puts "transmitting..."
     
-    #transmit( { cmd: "id", id: player_id } )
-    setupMsg = { id: player_id };
-    
     game = Game.find(game_id)
     player = Player.find(player_id)
     
-    if game.judge_id == player.id
-      #transmit( { cmd: "judge" } )
-      setupMsg[:role] = "judge"
-    else
-      #transmit( { cmd: "artist" } )
-      setupMsg[:role] = "artist"
-    end
-    
-    #debugger
-    
     game_state = GameState.find_by(player_id: player_id, game_id: game_id)
-    
+        
     if game_state.nil?
       game_state = GameState.new
       game_state.game = game
@@ -35,31 +22,45 @@ class GamesChannel < ApplicationCable::Channel
     else
       hand = game_state.state
     end
-    
-    #puts hand.inspect
-    
-    if !game_state.save
-      puts game_state.errors.full_messages
+
+    # if judging, send show-em command (before potential new game state added)
+    # skip if there is a cached gallery to be displayed
+    if game.judging && !game_state.cached_gallery
+      show_em(game)
     end
     
-    #transmit( { cmd: "hand", hand: hand } )
-    setupMsg[:hand] = JSON.parse(hand);
+    if game_state.has_changes_to_save? && !game_state.save
+      puts game_state.errors.full_messages
+    end
+
+    # transmit cached before current round info
+    if game_state.cached_gallery
+      transmit({ cmd: "show-em", all: game_state.cached_gallery });
+      if game_state.cached_winner
+        transmit({ cmd: "pick", player: game_state.cached_winner });
+      end
+    end
     
-    #transmit( { cmd: "prompt", prompt: game.prompt.prompt })
-    setupMsg[:prompt] = game.prompt.prompt
-    
-    setupMsg[:judging] = game.judging
-
-    #setupMsg[:players] = getPlayers game
-
-    transmit( setupMsg );
-
-    # whyyyyyy... is this necessary? 
-    Thread.new do
-      Rails.application.executor.wrap do
-        #debugger
-        broadcastPlayers
-        puts "--players broadcast--"
+    if !game.judging
+      setupMsg = { id: player_id }
+      
+      setupMsg[:role] = game.judge_id == player.id ? "judge" : "artist"
+      
+      setupMsg[:hand] = JSON.parse(hand)
+      
+      setupMsg[:prompt] = game.prompt.prompt
+          
+      #setupMsg[:players] = getPlayers game
+      
+      transmit( setupMsg );
+  
+      # whyyyyyy... is this necessary? 
+      Thread.new do
+        Rails.application.executor.wrap do
+          #debugger
+          broadcastPlayers
+          puts "--players broadcast--"
+        end
       end
     end
     
@@ -88,36 +89,52 @@ class GamesChannel < ApplicationCable::Channel
     stop_all_streams
   end
 
+  def show_em(game)
+    o = game.game_states.all.select { |j| j.player_id != game.judge_id }
+      .inject([]) do |acc, gs|
+        t = JSON.parse(gs.state).select { |el| el["position"].present? }
+        acc.append({player: gs.player_id, art: t, name: gs.player.name})
+        acc
+      end
+    # cache gallery for all but judge
+    artists = GameState.where(game: game).where.not(player: game.judge)
+    artists.update_all(cached_gallery: o.to_json)
+    ActionCable.server.broadcast(game_id, { cmd: "show-em", all: o });
+  end
+
   def start_countdown
     game = Game.find(game_id)
-    game.players.index_by(&:id) 
+    
+    # this was here... for no reason?
+    #game.players.index_by(&:id)
+    
     Thread.new do
       Rails.application.executor.wrap do
-        # your code here
-        15.step(5, -5) do |i|
+        ActionCable.server.broadcast(game_id, { cmd: "countdown", time: 10 });
+        sleep 7
+        3.downto(0) do |i|
           ActionCable.server.broadcast(game_id, { cmd: "countdown", time: i });
-          sleep 5
+          sleep 1
         end
         ActionCable.server.broadcast(game_id, { cmd: "countdown", time: 0 });
-        o = game.game_states.all.select { |j| j.player_id != game.judge_id }
-          .inject([]) do |acc, gs|
-            t = JSON.parse(gs.state).select { |el| el["position"].present? }
-            acc.append({player: gs.player_id, art: t, name: gs.player.name})
-            acc
-          end
-        ActionCable.server.broadcast(game_id, { cmd: "show-em", all: o });
+        
+        # not important enough to check if save succeeds?
+        game.judging = true
+        game.save
+
+        show_em(game)
       end
     end
   end
 
   def pick(data)
     game = Game.find(game_id)
+    game.judging = false
     ActionCable.server.broadcast(game_id, { cmd: "pick", player: data["player"] });
 
     # cache winner for all but judge
-    cw = GameState.find_by(game: game, player: game.judge).state
     artists = GameState.where(game: game).where.not(player: game.judge)
-    artists.update_all(cached_winner: cw)
+    artists.update_all(cached_winner: data["player"])
 
     #Thread.new do
       #Rails.application.executor.wrap do
@@ -165,6 +182,15 @@ class GamesChannel < ApplicationCable::Channel
       #end
     #end
 
+  end
+
+  def clear_caches
+    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
+    game_state.cached_gallery = nil
+    game_state.cached_winner = nil
+    if !game_state.save
+      puts "game state clear cache save error"
+    end
   end
 
   def update(data)

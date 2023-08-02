@@ -572,7 +572,12 @@ var cableFunc =
                     {
                         if (data.broadcast)
                         {
-                            gameState.resumeFunc = () => { gameState.artPause = false; this.received(data) };
+                            gameState.resumeFunc = () =>
+                                {
+                                    App.subc.perform("clear_caches");
+                                    gameState.artPause = false;
+                                    this.received(data)
+                                };
                             console.log("paused broadcast data:", data);
                             return;
                         }
@@ -756,11 +761,8 @@ var cableFunc =
                     {
                         gameState.gallery[data.player].classList.add("selectedArt");
 
-                        if (gameState.role == "artist")
-                        {
-                            gameState.artPause = true;
-                            resumeBtn.classList.remove("gone");
-                        }
+                        gameState.artPause = true;
+                        resumeBtn.classList.remove("gone");
                     }
                 }
             }
