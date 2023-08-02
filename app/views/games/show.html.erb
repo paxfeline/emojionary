@@ -570,17 +570,14 @@ var cableFunc =
 
                     if (gameState.artPause)
                     {
-                        if (data.broadcast)
-                        {
-                            gameState.resumeFunc = () =>
-                                {
-                                    App.subc.perform("clear_caches");
-                                    gameState.artPause = false;
-                                    this.received(data)
-                                };
-                            console.log("paused broadcast data:", data);
-                            return;
-                        }
+                        gameState.resumeFunc = () =>
+                            {
+                                App.subc.perform("clear_caches");
+                                gameState.artPause = false;
+                                this.received(data)
+                            };
+                        console.log("paused msg:", data);
+                        return;
                     }
 
                     // fix up new round command

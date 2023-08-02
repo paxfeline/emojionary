@@ -24,9 +24,12 @@ class GamesChannel < ApplicationCable::Channel
     end
 
     # if judging, send show-em command (before potential new game state added)
-    # skip if there is a cached gallery to be displayed
-    if game.judging && !game_state.cached_gallery
-      show_em(game)
+    # skip if there is a cached gallery to be displayed (or this is the judge,
+    # who won't have a cached gallery)
+    if game.judging && (!game_state.cached_gallery || game.judge_id == player.id)
+      transmit({role: game.judge_id == player.id ? "judge" : "artist"})
+      o = show_em(game)
+      transmit({ cmd: "show-em", all: o })
     end
     
     if game_state.has_changes_to_save? && !game_state.save
@@ -35,9 +38,10 @@ class GamesChannel < ApplicationCable::Channel
 
     # transmit cached before current round info
     if game_state.cached_gallery
-      transmit({ cmd: "show-em", all: game_state.cached_gallery });
+      transmit({ id: player_id, role: game_state.cached_role })
+      transmit({ cmd: "show-em", all: JSON.parse(game_state.cached_gallery) });
       if game_state.cached_winner
-        transmit({ cmd: "pick", player: game_state.cached_winner });
+        transmit({ cmd: "pick", player: JSON.parse(game_state.cached_winner) });
       end
     end
     
@@ -90,16 +94,12 @@ class GamesChannel < ApplicationCable::Channel
   end
 
   def show_em(game)
-    o = game.game_states.all.select { |j| j.player_id != game.judge_id }
+    return game.game_states.all.select { |j| j.player_id != game.judge_id }
       .inject([]) do |acc, gs|
         t = JSON.parse(gs.state).select { |el| el["position"].present? }
         acc.append({player: gs.player_id, art: t, name: gs.player.name})
         acc
       end
-    # cache gallery for all but judge
-    artists = GameState.where(game: game).where.not(player: game.judge)
-    artists.update_all(cached_gallery: o.to_json)
-    ActionCable.server.broadcast(game_id, { cmd: "show-em", all: o });
   end
 
   def start_countdown
@@ -122,7 +122,18 @@ class GamesChannel < ApplicationCable::Channel
         game.judging = true
         game.save
 
-        show_em(game)
+        o = show_em(game)
+        ActionCable.server.broadcast(game_id, { cmd: "show-em", all: o });
+
+        # cache gallery for all but judge
+        artists = GameState.where(game: game).where.not(player: game.judge)
+        artists.update_all(cached_gallery: o.to_json)
+        artists.each do |tist|
+          tist.cached_role = game.judge_id == tist.player.id ? "judge" : "artist"
+          if !tist.save
+            puts "cache role error"
+          end
+        end
       end
     end
   end
