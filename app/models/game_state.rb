@@ -4,6 +4,8 @@ class GameState < ApplicationRecord
   belongs_to :player
   belongs_to :game
 
+  has_many :cached_winner_infos, inverse_of: :game_state
+
   private
   def game_state_setup
     self.ready ||= false

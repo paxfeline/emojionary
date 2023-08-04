@@ -6,7 +6,7 @@
 #   movies = Movie.create([{ name: "Star Wars" }, { name: "Lord of the Rings" }])
 #   Character.create(name: "Luke", movie: movies.first)
 
-Prompt.create(prompt: "rodeo")
+Prompt.create!(prompt: "rodeo")
 Prompt.create(prompt: "academia")
 Prompt.create(prompt: "action movie")
 Prompt.create(prompt: "gym")

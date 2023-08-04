@@ -16,7 +16,7 @@ module ApplicationCable
       if self.kill_thread.present?
         self.kill_thread.exit
         self.kill_thread = nil
-        debugger
+        #debugger
       end
     end
 

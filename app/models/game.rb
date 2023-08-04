@@ -98,6 +98,8 @@ private
         #debugger
 
         self.deck ||= deck.to_json
+        
+        #debugger
 
         # prompt
         self.prompt ||= Prompt.all.select { |i| i.game.nil? }.sample

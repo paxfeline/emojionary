@@ -4,6 +4,44 @@ class GamesChannel < ApplicationCable::Channel
     stream_from game_id
   end
 
+  def get_next_state
+    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
+    caches = game_state.cached_winner_infos
+
+    if caches.count > 0
+
+      caches.shift
+      cached_info = caches[0]
+
+      transmit({ id: player_id, role: cached_info.cached_role })
+      transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery) });
+      if cached_info.cached_winner
+        transmit({ cmd: "pick", player: cached_info.cached_winner });
+      end
+
+    else
+      send_current_round_info
+    end
+
+  end
+
+  def send_current_round_info(game = nil, game_state = nil)
+    if game.nil?
+      game = Game.find(game_id)
+    end
+
+    if game_state.nil?
+      game_state = GameState.find_by(player_id: player_id, game_id: game_id)
+    end
+
+    setupMsg = { id: player_id }
+    setupMsg[:role] = game.judge_id == player_id ? "judge" : "artist"
+    setupMsg[:hand] = JSON.parse(game_state.state)
+    setupMsg[:prompt] = game.prompt.prompt
+
+    transmit( setupMsg );
+  end
+
   def after_confirmation_sent
     # broadcast initial message here
     puts "transmitting..."
@@ -17,55 +55,54 @@ class GamesChannel < ApplicationCable::Channel
       game_state = GameState.new
       game_state.game = game
       game_state.player = player
-      hand = game.deal
-      game_state.state = hand
+      game_state.state = game.deal
+    end
+
+    caches = game_state.cached_winner_infos
+
+    if caches.count > 0
+
+      cached_info = caches[0]
+
+      transmit({ id: player_id, role: cached_info.cached_role })
+      transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery) });
+      if cached_info.cached_winner
+        transmit({ cmd: "pick", player: cached_info.cached_winner });
+      end
+
     else
-      hand = game_state.state
-    end
 
-    # if judging, send show-em command (before potential new game state added)
-    # skip if there is a cached gallery to be displayed (or this is the judge,
-    # who won't have a cached gallery)
-    if game.judging && (!game_state.cached_gallery || game.judge_id == player.id)
-      transmit({role: game.judge_id == player.id ? "judge" : "artist"})
-      o = show_em(game)
-      transmit({ cmd: "show-em", all: o })
-    end
-    
-    if game_state.has_changes_to_save? && !game_state.save
-      puts game_state.errors.full_messages
-    end
-
-    # transmit cached before current round info
-    if game_state.cached_gallery
-      transmit({ id: player_id, role: game_state.cached_role })
-      transmit({ cmd: "show-em", all: JSON.parse(game_state.cached_gallery) });
-      if game_state.cached_winner
-        transmit({ cmd: "pick", player: game_state.cached_winner });
+      # if judging, send show-em command (before potential new game state added)
+      if game.judging
+        transmit({role: game.judge_id == player.id ? "judge" : "artist"})
+        o = show_em(game)
+        transmit({ cmd: "show-em", all: o })
       end
-    end
+
+      if game_state.has_changes_to_save? && !game_state.save
+        puts game_state.errors.full_messages
+      end
+
+      if !game.judging
+        send_current_round_info game, game_state
+
+        # curious why this doesn't seem to work:
+        #setupMsg[:players] = getPlayers game
     
-    if !game.judging
-      setupMsg = { id: player_id }
-      
-      setupMsg[:role] = game.judge_id == player.id ? "judge" : "artist"
-      
-      setupMsg[:hand] = JSON.parse(hand)
-      
-      setupMsg[:prompt] = game.prompt.prompt
-          
-      #setupMsg[:players] = getPlayers game
-      
-      transmit( setupMsg );
-  
-      # whyyyyyy... is this necessary? 
-      Thread.new do
-        Rails.application.executor.wrap do
-          #debugger
-          broadcastPlayers
-          puts "--players broadcast--"
+        # whyyyyyy... is this necessary? 
+        Thread.new do
+          Rails.application.executor.wrap do
+            #debugger
+            broadcastPlayers
+            puts "--after threaded players broadcast--"
+          end
         end
+
+        #debugger
+        getPlayers game
+        puts "--after unthreaded getPlayers--"
       end
+
     end
     
     puts "--end transmission--"
@@ -112,26 +149,33 @@ class GamesChannel < ApplicationCable::Channel
       Rails.application.executor.wrap do
         ActionCable.server.broadcast(game_id, { cmd: "countdown", time: 10 });
         sleep 7
-        3.downto(0) do |i|
+        3.downto(1) do |i|
           ActionCable.server.broadcast(game_id, { cmd: "countdown", time: i });
           sleep 1
         end
         ActionCable.server.broadcast(game_id, { cmd: "countdown", time: 0 });
         
-        # not important enough to check if save succeeds?
         game.judging = true
-        game.save
+        if !game.save
+          puts "show-em game save error"
+        end
 
         o = show_em(game)
         ActionCable.server.broadcast(game_id, { cmd: "show-em", all: o });
 
         # cache gallery for all but judge
-        artists = GameState.where(game: game).where.not(player: game.judge)
-        artists.update_all(cached_gallery: o.to_json)
+        artists = GameState.where(game: game)
         artists.each do |tist|
-          tist.cached_role = game.judge_id == tist.player.id ? "judge" : "artist"
-          if !tist.save
-            puts "cache role error"
+          info = CachedWinnerInfo.new
+          #info.game_state = tist
+          info.cached_gallery = o.to_json
+          info.cached_role = game.judge_id == tist.player.id ? "judge" : "artist"
+          #debugger
+          tist.cached_winner_infos << info
+          puts "pre info save"
+          if !info.save
+            puts "cache save error"
+            puts info.errors.full_messages
           end
         end
       end
@@ -141,11 +185,21 @@ class GamesChannel < ApplicationCable::Channel
   def pick(data)
     game = Game.find(game_id)
     game.judging = false
+    if !game.save
+      puts "pick game save error"
+    end
     ActionCable.server.broadcast(game_id, { cmd: "pick", player: data["player"] });
 
     # cache winner for all but judge
-    artists = GameState.where(game: game).where.not(player: game.judge)
-    artists.update_all(cached_winner: data["player"])
+    artists = GameState.where(game: game)
+    #debugger
+    artists.each do |tist|
+      info = tist.cached_winner_infos.last
+      info.cached_winner = Player.find(data["player"])
+      if !info.save
+        puts "cache pick save error"
+      end
+    end
 
     #Thread.new do
       #Rails.application.executor.wrap do
@@ -193,15 +247,6 @@ class GamesChannel < ApplicationCable::Channel
       #end
     #end
 
-  end
-
-  def clear_caches
-    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
-    game_state.cached_gallery = nil
-    game_state.cached_winner = nil
-    if !game_state.save
-      puts "game state clear cache save error"
-    end
   end
 
   def update(data)

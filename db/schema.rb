@@ -10,10 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_02_074512) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_03_024834) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
+
+  create_table "cached_winner_infos", force: :cascade do |t|
+    t.bigint "game_state_id"
+    t.uuid "cached_winner_id"
+    t.bigint "cached_prompt_id"
+    t.string "cached_gallery"
+    t.string "cached_role"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["cached_prompt_id"], name: "index_cached_winner_infos_on_cached_prompt_id"
+    t.index ["cached_winner_id"], name: "index_cached_winner_infos_on_cached_winner_id"
+    t.index ["game_state_id"], name: "index_cached_winner_infos_on_game_state_id"
+  end
 
   create_table "game_states", force: :cascade do |t|
     t.uuid "player_id", null: false
@@ -67,6 +80,9 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_02_074512) do
     t.index ["prompt_id"], name: "index_used_prompts_on_prompt_id"
   end
 
+  add_foreign_key "cached_winner_infos", "game_states"
+  add_foreign_key "cached_winner_infos", "players", column: "cached_winner_id"
+  add_foreign_key "cached_winner_infos", "prompts", column: "cached_prompt_id"
   add_foreign_key "game_states", "games"
   add_foreign_key "game_states", "players"
   add_foreign_key "game_states", "prompts", column: "cached_prompt_id"
