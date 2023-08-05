@@ -8,18 +8,27 @@ class GamesChannel < ApplicationCable::Channel
     game_state = GameState.find_by(player_id: player_id, game_id: game_id)
     caches = game_state.cached_winner_infos
 
-    if caches.count > 0
+    if caches.count > 1
 
-      caches.shift
-      cached_info = caches[0]
+      #caches.shift
+      #debugger
+        puts "cache destroyed and next returned"
+      caches[0].destroy
+      cached_info = caches[1]
 
       transmit({ id: player_id, role: cached_info.cached_role })
       transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery) });
       if cached_info.cached_winner
-        transmit({ cmd: "pick", player: cached_info.cached_winner });
+        transmit({ cmd: "pick", player: cached_info.cached_winner.id });
       end
 
     else
+      if caches.count > 0 # should always be true?
+        caches[0].destroy
+        puts "final cache destroyed"
+      else
+        puts "no chaches to destroy"
+      end
       send_current_round_info
     end
 
@@ -67,7 +76,7 @@ class GamesChannel < ApplicationCable::Channel
       transmit({ id: player_id, role: cached_info.cached_role })
       transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery) });
       if cached_info.cached_winner
-        transmit({ cmd: "pick", player: cached_info.cached_winner });
+        transmit({ cmd: "pick", player: cached_info.cached_winner.id });
       end
 
     else
