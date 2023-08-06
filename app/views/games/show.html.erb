@@ -570,6 +570,14 @@ var cableFunc =
                 // Called when there's incoming data on the websocket for this channel
                     console.log("cable incoming", data);
 
+                    // set pause to false before taking actions
+                    if (typeof data.art_pause !== "undefined" && !data.art_pause)
+                        gameState.art_pause = false;
+                    
+                    // skip msg if paused, allow if has 'cached' prop
+                    if (gameState.art_pause && !data.cached)
+                        return;
+
                     // fix up new round command
                     if (data.broadcast)
                     {
@@ -751,6 +759,10 @@ var cableFunc =
                         //gameState.artPause = true;
                         resumeBtn.classList.remove("gone");
                     }
+
+                    // set pause to true after actions
+                    if (data.art_pause)
+                        gameState.art_pause = true;
                 }
             }
         );

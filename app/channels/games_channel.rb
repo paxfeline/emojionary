@@ -8,18 +8,21 @@ class GamesChannel < ApplicationCable::Channel
     game_state = GameState.find_by(player_id: player_id, game_id: game_id)
     caches = game_state.cached_winner_infos
 
+    #debugger
+
     if caches.count > 1
 
       #caches.shift
-      #debugger
-        puts "cache destroyed and next returned"
+      debugger
       caches[0].destroy
       cached_info = caches[1]
 
-      transmit({ id: player_id, role: cached_info.cached_role })
-      transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery) });
+      puts "cache destroyed and next returned"
+
+      transmit({ id: player_id, role: cached_info.cached_role, cached: true })
+      transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery), cached: true });
       if cached_info.cached_winner
-        transmit({ cmd: "pick", player: cached_info.cached_winner.id });
+        transmit({ cmd: "pick", player: cached_info.cached_winner.id, cached: true });
       end
 
     else
@@ -47,6 +50,7 @@ class GamesChannel < ApplicationCable::Channel
     setupMsg[:role] = game.judge_id == player_id ? "judge" : "artist"
     setupMsg[:hand] = JSON.parse(game_state.state)
     setupMsg[:prompt] = game.prompt.prompt
+    setupMsg[:art_pause] = false # set true purely client-side
 
     transmit( setupMsg );
   end
@@ -69,6 +73,8 @@ class GamesChannel < ApplicationCable::Channel
 
     caches = game_state.cached_winner_infos
 
+    debugger
+
     if caches.count > 0
 
       cached_info = caches[0]
@@ -76,7 +82,7 @@ class GamesChannel < ApplicationCable::Channel
       transmit({ id: player_id, role: cached_info.cached_role })
       transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery) });
       if cached_info.cached_winner
-        transmit({ cmd: "pick", player: cached_info.cached_winner.id });
+        transmit({ cmd: "pick", player: cached_info.cached_winner.id, art_pause: true });
       end
 
     else
@@ -197,7 +203,8 @@ class GamesChannel < ApplicationCable::Channel
     if !game.save
       puts "pick game save error"
     end
-    ActionCable.server.broadcast(game_id, { cmd: "pick", player: data["player"] });
+    # send pick command w/ pause
+    ActionCable.server.broadcast(game_id, { cmd: "pick", player: data["player"], art_pause: true });
 
     # cache winner for all but judge
     artists = GameState.where(game: game)
@@ -247,7 +254,7 @@ class GamesChannel < ApplicationCable::Channel
         end
       end
       
-      ActionCable.server.broadcast(game_id, { broadcast: o });
+      #ActionCable.server.broadcast(game_id, { broadcast: o });
     else
       puts "new round fail"
       puts judge.errors.full_messages
