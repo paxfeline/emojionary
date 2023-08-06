@@ -13,7 +13,7 @@ class GamesChannel < ApplicationCable::Channel
     if caches.count > 1
 
       #caches.shift
-      debugger
+      #debugger
       caches[0].destroy
       cached_info = caches[1]
 
@@ -73,7 +73,7 @@ class GamesChannel < ApplicationCable::Channel
 
     caches = game_state.cached_winner_infos
 
-    debugger
+    #debugger
 
     if caches.count > 0
 
