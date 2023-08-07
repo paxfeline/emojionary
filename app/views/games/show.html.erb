@@ -131,14 +131,16 @@ body
 
 #field
 {
+    /*
     display: grid;
     grid-template-columns: 50vw 50vw;
-    --base-size: 7.5vw;
+    */
+    --base-size: 15vw;
 }
 
 #field > div
 {
-    height: 25vw;
+    height: 50vw;
     position: relative;
     outline: 1px solid black;
 }
@@ -308,6 +310,16 @@ body
     font-size: 10vw;
 }
 
+#resume-btn
+{
+    font-size: 10vmin;
+}
+
+#start-btn
+{
+    font-size: 10vw;
+}
+
 </style>
 
 <div id="prompt-div">
@@ -326,7 +338,7 @@ body
 <div id="judge">
     <div id="judge-panel">
         <button
-            style="font-size: 10vw;"
+            id="start-btn"
             onclick="startCountdown()">
             Start Countdown
         </button>
@@ -389,6 +401,7 @@ function text2CSS(text)
 var gameDiv = document.querySelector("#game");
 var handDiv = document.querySelector("#hand");
 var boardDiv = document.querySelector("#board");
+var startBtn = document.querySelector("#start-btn");
 var judgeDiv = document.querySelector("#judge");
 var readyReadoutDiv = document.querySelector("#ready-readout");
 var judgePanelDiv = document.querySelector("#judge-panel");
@@ -418,6 +431,7 @@ function setName()
 
 function startCountdown()
 {
+    startBtn.disabled = true;
     App.subc.perform("start_countdown");
 }
 
@@ -649,6 +663,7 @@ var cableFunc =
 
                             gameDiv.classList.add("gone");
                             judgeDiv.classList.remove("gone");
+                            startBtn.disabled = false;
                             readyReadoutDiv.classList.remove("gone");
                             judgePanelDiv.classList.remove("gone");
                             fieldContDiv.classList.add("gone");
@@ -757,6 +772,7 @@ var cableFunc =
                         gameState.gallery[data.player].classList.add("selectedArt");
 
                         //gameState.artPause = true;
+                        judgeTextDiv.classList.add("gone");
                         resumeBtn.classList.remove("gone");
                     }
 
