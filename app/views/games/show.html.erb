@@ -376,6 +376,14 @@ body
             <div onclick="setReady();">Ready for Judging</div>
             <div onclick="exitGame();">Exit Game</div>
         </div>
+        <div id="menu-players-section" class="menu-section">
+            <hr>
+            <details>
+                <summary>Players:</summary>
+                <div id="menu-player-list">
+                </div>
+            </details>
+        </div>
     </div>
     <div id="menu-close-section" class="menu-section">
         <hr>
@@ -414,6 +422,7 @@ var countdownDiv = document.querySelector("#countdown");
 var menuDiv = document.querySelector("#menu");
 var menuEmojiDiv = document.querySelector("#menu-emoji");
 var nameSpan = document.querySelector("#name-span");
+var menuPlayerList = document.querySelector("#menu-player-list");
 var menuEmojiSectionDiv = document.querySelector("#menu-emoji-section");
 var promptDiv = document.querySelector("#prompt");
 var newPromptBtn = document.querySelector("#new-prompt-btn");
@@ -452,6 +461,11 @@ function customPrompt()
         App.subc.perform("custom_prompt", {prompt: np});
         closeMenu();
     }
+}
+
+function kick(id)
+{
+    App.subc.perform("kick", {id});
 }
 
 newPromptBtn.addEventListener("pointerdown",
@@ -605,6 +619,10 @@ var cableFunc =
                     {
                         gameState.player = data.id;
                     }
+                    if (typeof data.sheriff !== "undefined")
+                    {
+                        gameState.sheriff = !!data.sheriff;
+                    }
                     if (data.name)
                     {
                         gameState.name = data.name;
@@ -617,9 +635,31 @@ var cableFunc =
                     if (data.players)
                     {
                         let ready = data.players.reduce( (acc, el) => (acc += el.ready ? 1 : 0, acc), 0 );
-                        let total = data.players.length;
-                        let list = data.players.reduce( (acc, el) => acc + `<br>${el.name ? el.name : "Unnamed"}: ${el.ready ? 'ready' : 'not ready'}`, '');
+                        let total = data.players.length - 1;
+                        let list = data.players.reduce( (acc, el) => acc + (el.judge ? '' : `<br>${el.name}: ${el.ready ? 'ready' : 'not ready'}`), '');
                         readyReadoutDiv.innerHTML = `${ready} / ${total}${list}`;
+
+                        menuPlayerList.innerHTML = "";
+                        data.players.forEach(
+                            pl =>
+                            {
+                                var li = document.createElement("div");
+                                li.innerHTML = pl.name;
+                                if (gameState.sheriff && gameState.player != pl.player)
+                                {
+                                    var kickBtn = document.createElement("button");
+                                    kickBtn.innerHTML = "(Kick)"
+                                    kickBtn.addEventListener("click",
+                                        e =>
+                                        {
+                                            console.log("kick", pl);
+                                            kick(pl.player);
+                                        })
+                                    li.appendChild(kickBtn);
+                                }
+                                menuPlayerList.appendChild(li);
+                            }
+                        )
                     }
                     if (data.hand)
                     {

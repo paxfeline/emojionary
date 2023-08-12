@@ -63,7 +63,7 @@ class GamesChannel < ApplicationCable::Channel
     game = Game.find(game_id)
     
     game_state = GameState.find_by(player_id: player_id, game_id: game_id)
-        
+    
     if game_state.nil?
       game_state = GameState.new
       game_state.game = game
@@ -75,7 +75,7 @@ class GamesChannel < ApplicationCable::Channel
 
     #debugger
 
-    transmit({ id: player_id, name: game_state.player.name })
+    transmit({ id: player_id, name: game_state.player.name, sheriff: game_state.sheriff })
 
     if caches.count > 0
 
@@ -131,9 +131,9 @@ class GamesChannel < ApplicationCable::Channel
     return nil if game_id.nil?
     game ||= Game.find(game_id)
     players = game.game_states.inject([]) do |acc, gs|
-      if gs.player_id != game.judge_id
-        acc.append({player: gs.player_id, ready: gs.ready, name: gs.player.name})
-      end
+      #if gs.player_id != game.judge_id
+        acc.append({player: gs.player_id, ready: gs.ready, name: gs.player.name, judge: gs.player_id == game.judge_id})
+      #end
       acc
     end
     #debugger
@@ -345,13 +345,23 @@ class GamesChannel < ApplicationCable::Channel
     end
   end
 
-  def exit_game
-    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
+  def exit_game(id = nil)
+    if id.nil?
+      id = player_id
+    end
+    game_state = GameState.find_by(player_id: id, game_id: game_id)
     game_state.destroy
 
     broadcastPlayers
 
     #debugger
-    ActionCable.server.remote_connections.where(player_id: player_id, game_id: game_id).disconnect
+    ActionCable.server.remote_connections.where(player_id: id, game_id: game_id).disconnect
+  end
+
+  def kick(data)
+    game_state = GameState.find_by(player_id: player_id, game_id: game_id)
+    if game_state.sheriff
+      exit_game(data["id"])
+    end
   end
 end
