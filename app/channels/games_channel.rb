@@ -50,7 +50,8 @@ class GamesChannel < ApplicationCable::Channel
     setupMsg[:role] = game.judge_id == player_id ? "judge" : "artist"
     setupMsg[:hand] = JSON.parse(game_state.state)
     setupMsg[:prompt] = game.prompt.prompt
-    setupMsg[:art_pause] = false # set true purely client-side
+    setupMsg[:name] = game_state.player.name
+    setupMsg[:art_pause] = false
 
     transmit( setupMsg );
   end
@@ -60,14 +61,13 @@ class GamesChannel < ApplicationCable::Channel
     puts "transmitting..."
     
     game = Game.find(game_id)
-    player = Player.find(player_id)
     
     game_state = GameState.find_by(player_id: player_id, game_id: game_id)
         
     if game_state.nil?
       game_state = GameState.new
       game_state.game = game
-      game_state.player = player
+      game_state.player_id = player_id
       game_state.state = game.deal
     end
 
@@ -75,10 +75,13 @@ class GamesChannel < ApplicationCable::Channel
 
     #debugger
 
+    transmit({ id: player_id, name: game_state.player.name })
+
     if caches.count > 0
 
       cached_info = caches[0]
 
+      # no need to re-transmit id
       transmit({ id: player_id, role: cached_info.cached_role })
       transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery) });
       if cached_info.cached_winner
@@ -335,6 +338,7 @@ class GamesChannel < ApplicationCable::Channel
     player = Player.find(player_id)
     player.name = data["name"]
     if player.save
+      transmit(name: data["name"])
       broadcastPlayers
     else
       puts "set name failure"

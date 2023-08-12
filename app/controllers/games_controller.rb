@@ -19,14 +19,18 @@ class GamesController < ApplicationController
 
     if @user.nil?
       @user = Player.new
+    end
+    
+    @user.name ||= Bazaar.super_object
 
-      if @user.save
-        cookies.permanent.signed[:emoji_game_player_id] = @user.id
+    puts "user name #{@user.name}"
 
-        #puts @user.inspect
-      else
-        render :index, status: :unprocessable_entity and return
-      end
+    if @user.save
+      cookies.permanent.signed[:emoji_game_player_id] = @user.id
+      
+      #puts @user.inspect
+    else
+      render :index, status: :unprocessable_entity and return
     end
 
     #debugger
@@ -61,6 +65,10 @@ class GamesController < ApplicationController
     else
       @judge = Player.new
     end
+
+    @judge.name ||= Bazaar.super_object
+
+    puts "judge name #{@judge.name}"
     
     puts "judge at #{Time.now.to_datetime}"
     @judge.last_judged = Time.now.to_datetime

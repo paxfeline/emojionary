@@ -371,7 +371,7 @@ body
             <hr>
         </div>
         <div id="menu-game-section" class="menu-section">
-            <div onclick="setName();">Set Name</div>
+            <div onclick="setName();"><span id="name-span"></span> (Set Name)</div>
             <div onclick="setReady();">Ready for Judging</div>
             <div onclick="exitGame();">Exit Game</div>
         </div>
@@ -412,6 +412,7 @@ var resumeBtn = document.querySelector("#resume-btn");
 var countdownDiv = document.querySelector("#countdown");
 var menuDiv = document.querySelector("#menu");
 var menuEmojiDiv = document.querySelector("#menu-emoji");
+var nameSpan = document.querySelector("#name-span");
 var menuEmojiSectionDiv = document.querySelector("#menu-emoji-section");
 var promptDiv = document.querySelector("#prompt");
 var newPromptBtn = document.querySelector("#new-prompt-btn");
@@ -602,6 +603,11 @@ var cableFunc =
                     if (data.id)
                     {
                         gameState.player = data.id;
+                    }
+                    if (data.name)
+                    {
+                        gameState.name = data.name;
+                        nameSpan.innerHTML = data.name;
                     }
                     if (data.prompt)
                     {
