@@ -19,7 +19,7 @@ class GamesChannel < ApplicationCable::Channel
 
       puts "cache destroyed and next returned"
 
-      transmit({ id: player_id, role: cached_info.cached_role, cached: true })
+      transmit({ id: player_id, role: cached_info.cached_role, prompt: cached_info.cached_prompt.prompt, cached: true })
       transmit({ cmd: "show-em", all: JSON.parse(cached_info.cached_gallery), cached: true });
       if cached_info.cached_winner
         transmit({ cmd: "pick", player: cached_info.cached_winner.id, cached: true });
@@ -186,6 +186,7 @@ class GamesChannel < ApplicationCable::Channel
           info.cached_gallery = o.to_json
           info.cached_role = game.judge_id == tist.player.id ? "judge" : "artist"
           #debugger
+          info.cached_prompt = game.prompt;
           tist.cached_winner_infos << info
           puts "pre info save"
           if !info.save
