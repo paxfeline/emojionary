@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_03_024834) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_12_221155) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -39,6 +39,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_03_024834) do
     t.string "cached_gallery"
     t.string "cached_role"
     t.bigint "cached_prompt_id"
+    t.boolean "sheriff"
     t.index ["cached_prompt_id"], name: "index_game_states_on_cached_prompt_id"
     t.index ["game_id"], name: "index_game_states_on_game_id"
     t.index ["player_id"], name: "index_game_states_on_player_id"

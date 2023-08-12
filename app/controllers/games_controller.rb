@@ -92,6 +92,18 @@ class GamesController < ApplicationController
       puts @judge.errors.full_messages
       render :index, status: :unprocessable_entity
     end
+
+    game_state = GameState.new
+    game_state.game = @game
+    game_state.player_id = @judge.id
+    game_state.state = @game.deal
+    game_state.sheriff = true
+
+    if !game_state.save
+      puts "sheriff game_state save fail"
+      puts @judge.errors.full_messages
+      render :index, status: :unprocessable_entity
+    end
   end
 
   private
